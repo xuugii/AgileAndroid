@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry exported="true" kind="lib" path="E:/Users/ext.uguudei.sukhbaat/Study/DIT191/Project/lib/egit-github/org.eclipse.egit.github.core/target/org.eclipse.egit.github.core-4.0.0-SNAPSHOT.jar" sourcepath="E:/Users/ext.uguudei.sukhbaat/Study/DIT191/Project/lib/egit-github/org.eclipse.egit.github.core"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

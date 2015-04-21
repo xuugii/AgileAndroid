@@ -1,0 +1,5 @@
+org.eclipse.egit.github.core
+org.eclipse.egit.github.core.client
+org.eclipse.egit.github.core.event
+org.eclipse.egit.github.core.service
+org.eclipse.egit.github.core.util
