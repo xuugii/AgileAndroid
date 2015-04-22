@@ -17,6 +17,20 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity
@@ -144,6 +158,116 @@ public class MainActivity extends ActionBarActivity
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
+    }
+
+    /**
+     * Remote Service Helper
+     */
+    private IRemoteService remoteService;
+    private boolean started = false;
+    private RemoteServiceConnection conn = null;
+
+
+    private void startService(){
+        if (started) {
+            Toast.makeText(MainActivity.this,
+                    "Service already started", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent i = new Intent();
+            i.setClassName("githubnotify.githubpro.com.githubnotify",
+                    "githubnotify.githubpro.com.githubnotify.GitHubService");
+            startService(i);
+            started = true;
+            updateServiceStatus();
+            Log.d( getClass().getSimpleName(), "startService()" );
+        }
+    }
+
+    private void stopService() {
+        if (!started) {
+            Toast.makeText(MainActivity.this,
+                    "Service not yet started", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent i = new Intent();
+            i.setClassName("githubnotify.githubpro.com.githubnotify",
+                    "githubnotify.githubpro.com.githubnotify.GitHubService");
+            stopService(i);
+            started = false;
+            updateServiceStatus();
+            Log.d( getClass().getSimpleName(), "stopService()" );
+        }
+    }
+
+    private void bindService() {
+        if(conn == null) {
+            conn = new RemoteServiceConnection();
+            Intent i = new Intent();
+            i.setClassName("githubnotify.githubpro.com.githubnotify",
+                    "githubnotify.githubpro.com.githubnotify.GitHubService");
+            bindService(i, conn, Context.BIND_AUTO_CREATE);
+            updateServiceStatus();
+            Log.d( getClass().getSimpleName(), "bindService()" );
+        } else {
+            Toast.makeText(MainActivity.this,
+                    "Cannot bind - service already bound", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void releaseService() {
+        if(conn != null) {
+            unbindService(conn);
+            conn = null;
+            updateServiceStatus();
+            Log.d( getClass().getSimpleName(), "releaseService()" );
+        } else {
+            Toast.makeText(MainActivity.this,
+                    "Cannot unbind - service not bound", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void invokeService() {
+        if(conn == null) {
+            Toast.makeText(MainActivity.this,
+                    "Cannot invoke - service not bound", Toast.LENGTH_SHORT).show();
+        } else {
+            try {
+                int counter = remoteService.getCounter();
+             //   TextView t = (TextView)findViewById(R.id.notApplicable);
+               // t.setText( "Counter value: "+Integer.toString( counter ) );
+                Log.d( getClass().getSimpleName(), "invokeService()" );
+            } catch (RemoteException re) {
+                Log.e( getClass().getSimpleName(), "RemoteException" );
+            }
+        }
+    }
+
+    class RemoteServiceConnection implements ServiceConnection {
+        public void onServiceConnected(ComponentName className,
+                                       IBinder boundService ) {
+            remoteService = IRemoteService.Stub.asInterface((IBinder)boundService);
+            Log.d( getClass().getSimpleName(), "onServiceConnected()" );
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            remoteService = null;
+            updateServiceStatus();
+            Log.d( getClass().getSimpleName(), "onServiceDisconnected" );
+        }
+    };
+
+    private void updateServiceStatus() {
+        String bindStatus = conn == null ? "unbound" : "bound";
+        String startStatus = started ? "started" : "not started";
+        String statusText = "Service status: "+
+                bindStatus+ ","+ startStatus;
+        //TextView t = (TextView)findViewById( R.id.serviceStatus);
+        //t.setText( statusText );
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        releaseService();
+        Log.d( getClass().getSimpleName(), "onDestroy()" );
     }
 
 }
