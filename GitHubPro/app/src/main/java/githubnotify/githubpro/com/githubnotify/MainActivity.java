@@ -16,6 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
+import android.widget.ScrollView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -31,11 +34,24 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
-
+    public static boolean loggedIn = false;
+    public static Activity activity;
+    static GitHubParser gitHub;
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -59,6 +75,7 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+        activity = this;
     }
 
     @Override
@@ -149,6 +166,26 @@ public class MainActivity extends ActionBarActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            int menu = getArguments().getInt(ARG_SECTION_NUMBER);
+            switch (menu){
+                case 1:
+                    ScrollView scrollView = new ScrollView(getActivity());
+                    LayoutParams sParams = new ScrollView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                    scrollView.setLayoutParams(sParams);
+                    LinearLayout linearLayout = new LinearLayout(getActivity());
+                    LayoutParams lParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
+                    // Main Layout
+                    linearLayout.setLayoutParams(lParams);
+                    TextView test = new TextView(getActivity());
+                    test.setText("Uguudei");
+                    linearLayout.addView(test);
+                    scrollView.addView(linearLayout);
+                    FetchGitInformationForTable(linearLayout);
+                    return scrollView;
+                case 2: break;
+                case 3: break;
+            }
             return rootView;
         }
 
@@ -158,7 +195,58 @@ public class MainActivity extends ActionBarActivity
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
+
+        private static final ScheduledExecutorService worker = Executors
+                .newSingleThreadScheduledExecutor();
+
+        void FetchGitInformationForTable(final LinearLayout linearLayout) {
+            Runnable task = new Runnable() {
+                public void run() {
+                    if (LoginActivity.password.length()!=0){
+                        gitHub = new GitHubParser(LoginActivity.userName,LoginActivity.password, LoginActivity.repoName);
+                    } else {
+                        if (LoginActivity.token.length() == 0){
+                            //todo exit?
+                        } else {
+                            gitHub = new GitHubParser(LoginActivity.token, LoginActivity.repoName);
+                        }
+                    }
+
+                    List<DataCommit> listCommits = gitHub.getListCommits();
+
+                    TableLayout table = new TableLayout(activity);
+                    LayoutParams tableParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                    table.setLayoutParams(tableParams);
+                    for (DataCommit dataCommit: listCommits){
+                        TableRow row = new TableRow(activity);
+                        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                        rowParams.setMargins(1,1,1,1);
+                        TextView commiter = new TextView(activity);
+                        TextView message = new TextView(activity);
+                        TextView date = new TextView(activity);
+
+                        commiter.setText(dataCommit.author);
+                        message.setText(dataCommit.commitMessage);
+                        date.setText(dataCommit.date.toString());
+
+                        row.addView(commiter);
+                        row.addView(message);
+                        row.addView(date);
+                        table.addView(row);
+                    }
+                    linearLayout.addView(table);
+
+                }
+            };
+            worker.schedule(task, 0, TimeUnit.SECONDS);
+        }
     }
+
+    /**
+     * Network on another thread
+     */
+
+
 
     /**
      * Remote Service Helper

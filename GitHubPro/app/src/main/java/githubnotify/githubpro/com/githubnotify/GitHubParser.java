@@ -104,6 +104,7 @@ public class GitHubParser {
                         dataCommit.commitMessage = commitService.getCommits(repo).get(i).getCommit().getMessage();
                         tmp.add(dataCommit);
                     }
+                    return tmp;
                 }
             }
         } catch (IOException e) {
