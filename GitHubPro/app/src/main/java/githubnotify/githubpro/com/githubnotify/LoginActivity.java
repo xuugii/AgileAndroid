@@ -64,9 +64,8 @@ public class LoginActivity extends Activity implements OnClickListener{
                 //password = loginPassword.getText().toString();
                 //token = loginToken.getText().toString();
                 //repoName = loginRepo.getText().toString();
-                userName = "uguudei@gmail.com";
-                password = "git5ugu247";
                 token = loginToken.getText().toString();
+                //TODO fix remove this
                 repoName = "AgileAndroid";
                 Intent main = new Intent(LoginActivity.this, MainActivity.class);
                 LoginActivity.this.startActivity(main);
