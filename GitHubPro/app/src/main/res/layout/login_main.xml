@@ -4,7 +4,7 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent" android:background="@color/button_material_light">
 
-    <FrameLayout android:id="@+id/container" android:layout_width="match_parent"
+    <FrameLayout android:id="@+id/loginFrame" android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
         <LinearLayout
@@ -58,10 +58,10 @@
                 android:hint="Token (can be used instead of email and password)" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/login"
-                android:id="@+id/LoginButton"
+                android:id="@+id/loginButton"
                 android:layout_gravity="right" />
         </LinearLayout>
     </FrameLayout>
