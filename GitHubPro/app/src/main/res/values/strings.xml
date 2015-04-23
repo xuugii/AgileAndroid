@@ -4,7 +4,7 @@
     <string name="title_section1">Git notification</string>
     <string name="title_section2">Take a note </string>
     <string name="title_section3">Planning poker</string>
-
+    <string name="title_section4">Service</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 

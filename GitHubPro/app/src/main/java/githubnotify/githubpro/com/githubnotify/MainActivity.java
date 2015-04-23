@@ -48,10 +48,19 @@ import java.util.concurrent.ScheduledExecutorService;
 
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, OnClickListener {
     public static boolean loggedIn = false;
     public static Activity activity;
     static GitHubParser gitHub;
+    static Button start;
+    static Button stop;
+    static Button bind;
+    static Button invoke;
+    static Button release;
+
+
+
+
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -98,7 +107,10 @@ public class MainActivity extends ActionBarActivity
             case 3:
                 mTitle = getString(R.string.title_section3);
                 break;
-        }
+            case 4:
+                mTitle = getString(R.string.title_section4);
+                break;
+    }
     }
 
     public void restoreActionBar() {
@@ -185,6 +197,22 @@ public class MainActivity extends ActionBarActivity
                     return scrollView;
                 case 2: break;
                 case 3: break;
+                case 4:
+                    View rootViewService = inflater.inflate(R.layout.service_view, container, false);
+                    start = (Button)rootViewService.findViewById(R.id.serviceStart);
+                    stop = (Button)rootViewService.findViewById(R.id.serviceStop);
+                    bind = (Button)rootViewService.findViewById(R.id.serviceBind);
+                    invoke = (Button)rootViewService.findViewById(R.id.serviceInvoke);
+                    release = (Button)rootViewService.findViewById(R.id.serviceRelease);
+
+                    start.setOnClickListener((OnClickListener)activity);
+                    stop.setOnClickListener((OnClickListener)activity);
+                    bind.setOnClickListener((OnClickListener)activity);
+                    invoke.setOnClickListener((OnClickListener)activity);
+                    release.setOnClickListener((OnClickListener)activity);
+
+                    return rootViewService;
+
             }
             return rootView;
         }
@@ -320,8 +348,8 @@ public class MainActivity extends ActionBarActivity
         } else {
             try {
                 int counter = remoteService.getCounter();
-             //   TextView t = (TextView)findViewById(R.id.notApplicable);
-               // t.setText( "Counter value: "+Integer.toString( counter ) );
+                TextView t = (TextView)findViewById(R.id.serviceCounter);
+                t.setText( "Counter value: "+Integer.toString( counter ) );
                 Log.d( getClass().getSimpleName(), "invokeService()" );
             } catch (RemoteException re) {
                 Log.e( getClass().getSimpleName(), "RemoteException" );
@@ -348,14 +376,29 @@ public class MainActivity extends ActionBarActivity
         String startStatus = started ? "started" : "not started";
         String statusText = "Service status: "+
                 bindStatus+ ","+ startStatus;
-        //TextView t = (TextView)findViewById( R.id.serviceStatus);
-        //t.setText( statusText );
+        TextView t = (TextView)findViewById( R.id.serviceStatus);
+        t.setText( statusText );
     }
 
     protected void onDestroy() {
         super.onDestroy();
         releaseService();
         Log.d( getClass().getSimpleName(), "onDestroy()" );
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (start.isPressed()){
+            startService();
+        } else if (stop.isPressed()){
+            stopService();
+        } else if (bind.isPressed()){
+            bindService();
+        } else if (invoke.isPressed()){
+            invokeService();
+        } else if (release.isPressed()){
+            releaseService();
+        }
     }
 
 }

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:background="@color/button_material_light">
+
+    <FrameLayout android:id="@+id/loginFrame" android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center"
+            android:id="@+id/login">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Service "
+                android:textSize="45sp"
+                android:id="@+id/serviceTitle"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Start"
+                android:id="@+id/serviceStart"
+                android:layout_gravity="right" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Stop"
+                android:id="@+id/serviceStop"
+                android:layout_gravity="right" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bind"
+                android:id="@+id/serviceBind"
+                android:layout_gravity="right" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Release"
+                android:id="@+id/serviceRelease"
+                android:layout_gravity="right" />
+             <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Invoke"
+                android:id="@+id/serviceInvoke"
+                android:layout_gravity="right" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Counter: "
+                android:id="@+id/serviceCounter" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Large Text"
+                android:id="@+id/serviceStatus" />
+            android:layout_gravity="right" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>
