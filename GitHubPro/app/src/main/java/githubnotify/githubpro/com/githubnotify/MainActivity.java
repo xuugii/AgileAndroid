@@ -39,6 +39,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +59,8 @@ public class MainActivity extends ActionBarActivity
     static Button bind;
     static Button invoke;
     static Button release;
-
+    public static int MENU_SIZE = 4;
+    public static List<PlaceholderFragment> listFragment = new ArrayList<>();
 
 
 
@@ -85,6 +88,9 @@ public class MainActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
         activity = this;
+        for (int i = 0; i < MENU_SIZE; i++) {
+            listFragment.add(PlaceholderFragment.newInstance(i + 1));
+        }
     }
 
     @Override
@@ -92,8 +98,9 @@ public class MainActivity extends ActionBarActivity
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .replace(R.id.container, listFragment.get(position))
                 .commit();
+
     }
 
     public void onSectionAttached(int number) {
@@ -153,6 +160,9 @@ public class MainActivity extends ActionBarActivity
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+
+        public View savedView = null;
+
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -181,20 +191,24 @@ public class MainActivity extends ActionBarActivity
             int menu = getArguments().getInt(ARG_SECTION_NUMBER);
             switch (menu){
                 case 1:
-                    ScrollView scrollView = new ScrollView(getActivity());
-                    LayoutParams sParams = new ScrollView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-                    scrollView.setLayoutParams(sParams);
-                    LinearLayout linearLayout = new LinearLayout(getActivity());
-                    LayoutParams lParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-                    linearLayout.setOrientation(LinearLayout.VERTICAL);
-                    // Main Layout
-                    linearLayout.setLayoutParams(lParams);
-                    TextView test = new TextView(getActivity());
-                    test.setText("Uguudei");
-                    linearLayout.addView(test);
-                    scrollView.addView(linearLayout);
-                    FetchGitInformationForTable(linearLayout);
-                    return scrollView;
+                    if (savedView == null){
+                        ScrollView scrollView = new ScrollView(getActivity());
+                        LayoutParams sParams = new ScrollView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                        scrollView.setLayoutParams(sParams);
+                        LinearLayout linearLayout = new LinearLayout(getActivity());
+                        LayoutParams lParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                        linearLayout.setOrientation(LinearLayout.VERTICAL);
+                        // Main Layout
+                        linearLayout.setLayoutParams(lParams);
+                        TextView test = new TextView(getActivity());
+                        test.setText("Uguudei");
+                        linearLayout.addView(test);
+                        scrollView.addView(linearLayout);
+                        FetchGitInformationForTable(linearLayout);
+                        return scrollView;
+                    }
+                    FetchGitInformationForTable((LinearLayout)((ViewGroup)savedView).getChildAt(0));
+                    return savedView;
                 case 2: break;
                 case 3: break;
                 case 4:
@@ -210,7 +224,6 @@ public class MainActivity extends ActionBarActivity
                     bind.setOnClickListener((OnClickListener)activity);
                     invoke.setOnClickListener((OnClickListener)activity);
                     release.setOnClickListener((OnClickListener)activity);
-
                     return rootViewService;
 
             }
