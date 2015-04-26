@@ -1,6 +1,8 @@
 package githubnotify.githubpro.com.githubnotify;
 
+import org.eclipse.egit.github.core.Commit;
 import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
@@ -97,11 +99,14 @@ public class GitHubParser {
         try {
             for (Repository repo : service.getRepositories()){
                 if (repo.getName().equals(repoName)) {
-                    for (int i = 0; i < commitService.getCommits(repo).size(); i++) {
+                    List<RepositoryCommit> list = commitService.getCommits(repo);
+                    int size = list.size();
+                    for (int i = 0; i < size; i++) {
                         DataCommit dataCommit = new DataCommit();
-                        dataCommit.author = commitService.getCommits(repo).get(i).getCommit().getCommitter().getEmail();
-                        dataCommit.date = commitService.getCommits(repo).get(i).getCommit().getCommitter().getDate();
-                        dataCommit.commitMessage = commitService.getCommits(repo).get(i).getCommit().getMessage();
+                        Commit commit = list.get(i).getCommit();
+                        dataCommit.author = commit.getCommitter().getEmail();
+                        dataCommit.date = commit.getCommitter().getDate();
+                        dataCommit.commitMessage = commit.getMessage();
                         tmp.add(dataCommit);
                     }
                     return tmp;

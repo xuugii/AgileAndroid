@@ -32,7 +32,8 @@
                 android:hint="@string/username"
                 android:ems="10"
                 android:id="@+id/loginEmail"
-                android:layout_margin="10dp" />
+                android:layout_margin="10dp"
+                android:text="uguudei@gmail.com" />
 
             <EditText
                 android:layout_width="match_parent"
@@ -41,14 +42,16 @@
                 android:ems="10"
                 android:id="@+id/loginPassword"
                 android:hint="@string/password"
-                android:layout_margin="10dp" />
+                android:layout_margin="10dp"
+                android:text="sdfsdf" />
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/loginRepo"
                 android:ems="10"
                 android:hint="Repository name"
-                android:layout_margin="10dp" />
+                android:layout_margin="10dp"
+                android:text="sdfsdf" />
 
 
             <EditText
