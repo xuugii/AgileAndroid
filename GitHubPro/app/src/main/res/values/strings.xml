@@ -15,4 +15,7 @@
     <string name="username">Username</string>
     <string name="password">Password...</string>
     <string name="login">Log In</string>
+    <string name="title_activity_display_tile">DisplayTile</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>
