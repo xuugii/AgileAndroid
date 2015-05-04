@@ -188,7 +188,7 @@ public class MainActivity extends ActionBarActivity
                 case 2:
                     break;
                 case 3:
-                    break;
+                    return (new PlanningPokerView(activity)).getView();
                 case 4:
                     View rootViewService = inflater.inflate(R.layout.service_view, container, false);
                     start = (Button) rootViewService.findViewById(R.id.serviceStart);
@@ -306,7 +306,7 @@ public class MainActivity extends ActionBarActivity
     class RemoteServiceConnection implements ServiceConnection {
         public void onServiceConnected(ComponentName className,
                                        IBinder boundService ) {
-            remoteService = IRemoteService.Stub.asInterface((IBinder)boundService);
+            remoteService = IRemoteService.Stub.asInterface(boundService);
             Log.d( getClass().getSimpleName(), "onServiceConnected()" );
         }
 
@@ -315,7 +315,7 @@ public class MainActivity extends ActionBarActivity
             updateServiceStatus();
             Log.d( getClass().getSimpleName(), "onServiceDisconnected" );
         }
-    };
+    }
 
     private void updateServiceStatus() {
         String bindStatus = conn == null ? "unbound" : "bound";
