@@ -60,14 +60,11 @@ public class LoginActivity extends Activity implements OnClickListener{
             if (((loginEmail.getText().length()!=0 && loginPassword.getText().length()!=0)
                     || loginToken.getText().length()!=0)
                     && loginRepo.getText().length()!=0){
-                //userName = loginEmail.getText().toString();
-                //password = loginPassword.getText().toString();
-                //token = loginToken.getText().toString();
-                //repoName = loginRepo.getText().toString();
-                //token = loginToken.getText().toString();
+                userName = loginEmail.getText().toString();
+                password = loginPassword.getText().toString();
+                token = loginToken.getText().toString();
+                repoName = loginRepo.getText().toString();
                 //TODO fix remove this
-                userName = "uguudei@gmail.com";
-                repoName = "AgileAndroid";
                 Intent main = new Intent(LoginActivity.this, MainActivity.class);
                 LoginActivity.this.startActivity(main);
             } else {
