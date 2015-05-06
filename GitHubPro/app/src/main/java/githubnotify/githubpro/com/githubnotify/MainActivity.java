@@ -1,6 +1,10 @@
 package githubnotify.githubpro.com.githubnotify;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -47,7 +51,7 @@ public class MainActivity extends ActionBarActivity
     static Button bind;
     static Button invoke;
     static Button release;
-    public static int MENU_SIZE = 4;
+    public static int MENU_SIZE = 5;
     public static List<PlaceholderFragment> listFragment = new ArrayList<>();
 
 
@@ -105,6 +109,9 @@ public class MainActivity extends ActionBarActivity
             case 4:
                 mTitle = getString(R.string.title_section4);
                 break;
+            case 5:
+                mTitle = "Notification";
+                break;
     }
     }
 
@@ -150,7 +157,7 @@ public class MainActivity extends ActionBarActivity
     public static class PlaceholderFragment extends Fragment {
 
         public View savedView = null;
-
+        public int SIMPLE_NOTFICATION_ID;
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -202,6 +209,46 @@ public class MainActivity extends ActionBarActivity
                     invoke.setOnClickListener((OnClickListener) activity);
                     release.setOnClickListener((OnClickListener) activity);
                     return rootViewService;
+                case 5:
+//                    TODO: use notification class
+                    final View notificationService = inflater.inflate(R.layout.notification_view, container, false);
+
+                    final NotificationManager mNotificationManager;
+
+                    mNotificationManager =
+                            (NotificationManager)activity.getSystemService(NOTIFICATION_SERVICE);
+                    final Notification notifyDetails =
+                            new Notification(R.drawable.android,
+                                    "You've got a new notification!",System.currentTimeMillis());
+
+                    Button start = (Button)notificationService.findViewById(R.id.notifyButton);
+                    Button cancel = (Button)notificationService.findViewById(R.id.cancelButton);
+
+                    start.setOnClickListener(new OnClickListener() {
+
+                        public void onClick(View v) {
+
+                            Context context = activity.getApplicationContext();
+                            CharSequence contentTitle =
+                                    "Notification Details...";
+                            CharSequence contentText =
+                                    "New Conflicting commit!";
+                            Intent notifyIntent =
+                                    new Intent(MainActivity.activity,LoginActivity.class);
+                            PendingIntent intent =
+                                    PendingIntent.getActivity(getActivity(), 0, notifyIntent, Intent.FILL_IN_DATA);
+                            notifyDetails.setLatestEventInfo(context,
+                                    contentTitle, contentText, intent);
+                            mNotificationManager.notify(SIMPLE_NOTFICATION_ID, notifyDetails);
+                        }
+                    });
+
+                    cancel.setOnClickListener(new OnClickListener() {
+                        public void onClick(View v) {
+                            mNotificationManager.cancel(SIMPLE_NOTFICATION_ID);
+                        }
+                    });
+                    return notificationService;
 
             }
             return rootView;
@@ -293,8 +340,9 @@ public class MainActivity extends ActionBarActivity
         } else {
             try {
                 int counter = remoteService.getCounter();
+                int changeCommitSize = remoteService.getCommitSize();
                 TextView t = (TextView)findViewById(R.id.serviceCounter);
-                t.setText( "Counter value: "+Integer.toString( counter ) );
+                t.setText( "Counter value: "+Integer.toString( counter ) + "CommitSize: " + Integer.toString(changeCommitSize));
                 Log.d( getClass().getSimpleName(), "invokeService()" );
             } catch (RemoteException re) {
                 Log.e( getClass().getSimpleName(), "RemoteException" );

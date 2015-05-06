@@ -26,7 +26,7 @@ public class GitHubViewListAdapter extends BaseAdapter{
     private LayoutInflater mInflater;
     public List<DataCommit> myItems;
     private Activity activity;
-    private GitHubViewListAdapter listAdapter;
+    public static GitHubViewListAdapter listAdapter;
     public GitHubViewListAdapter(Activity activity) {
         initGitHub();
         this.activity = activity;
