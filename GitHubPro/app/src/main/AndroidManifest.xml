@@ -38,7 +38,15 @@
         <activity
             android:name=".DisplayTile"
             android:label="@string/title_activity_display_tile"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+        </activity>
+        <activity
+            android:name=".SelectFiles"
+            android:label="@string/title_activity_select_files"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="githubnotify.githubpro.com.githubnotify.MainActivity" />
         </activity>
     </application>
 

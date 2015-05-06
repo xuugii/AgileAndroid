@@ -186,7 +186,7 @@ public class MainActivity extends ActionBarActivity
                     }
                     return savedView;
                 case 2:
-                    break;
+                    return (new SelectFiles(activity)).getListView();
                 case 3:
                     return (new PlanningPokerView(activity)).getView();
                 case 4:

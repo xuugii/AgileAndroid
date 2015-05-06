@@ -2,7 +2,7 @@
     <string name="app_name">GitHubNotify</string>
 
     <string name="title_section1">Git notification</string>
-    <string name="title_section2">Take a note </string>
+    <string name="title_section2">Select files </string>
     <string name="title_section3">Planning poker</string>
     <string name="title_section4">Service</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -18,4 +18,5 @@
     <string name="title_activity_display_tile">DisplayTile</string>
 
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_select_files">SelectFiles</string>
 </resources>
