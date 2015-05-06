@@ -43,7 +43,7 @@
                 android:id="@+id/loginPassword"
                 android:hint="@string/password"
                 android:layout_margin="10dp"
-                android:text="sdfsdf" />
+                android:text="" />
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
                 android:ems="10"
                 android:hint="Repository name"
                 android:layout_margin="10dp"
-                android:text="sdfsdf" />
+                android:text="AgileAndroid" />
 
 
             <EditText

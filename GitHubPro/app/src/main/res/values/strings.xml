@@ -5,6 +5,7 @@
     <string name="title_section2">Select files </string>
     <string name="title_section3">Planning poker</string>
     <string name="title_section4">Service</string>
+    <string name="title_section5">Notification</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
@@ -16,6 +17,8 @@
     <string name="password">Password...</string>
     <string name="login">Log In</string>
     <string name="title_activity_display_tile">DisplayTile</string>
+    <string name="notify">Send Notification</string>
+    <string name="cancel">Cancel Notification</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_select_files">SelectFiles</string>

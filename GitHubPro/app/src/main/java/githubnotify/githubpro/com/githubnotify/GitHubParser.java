@@ -1,12 +1,17 @@
 package githubnotify.githubpro.com.githubnotify;
 
+import android.util.Log;
+
 import org.eclipse.egit.github.core.Commit;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
+import org.eclipse.egit.github.core.Tree;
+import org.eclipse.egit.github.core.TreeEntry;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,9 +119,36 @@ public class GitHubParser {
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block
+            Log.e("GitHubParser", "getListCommits()" + e.getMessage());
             e.printStackTrace();
         }
         return tmp;
+    }
+
+    public List<File> getRepoFiles(){
+        try {
+            for (Repository repo : service.getRepositories()){
+                if (repo.getName().equals(repoName)) {
+                    Repository d = repo.getSource();
+                    List<RepositoryCommit> list = commitService.getCommits(repo);
+                    int size = list.size();
+                    for (int i = 0; i < size; i++) {
+                        DataCommit dataCommit = new DataCommit();
+                        Commit commit = list.get(i).getCommit();
+                        commit.getTree();
+                        dataCommit.author = commit.getCommitter().getEmail();
+                        dataCommit.date = commit.getCommitter().getDate();
+                        dataCommit.commitMessage = commit.getMessage();
+//                        tmp.add(dataCommit);
+                    }
+                    return null;
+                }
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void main(String[] args) {

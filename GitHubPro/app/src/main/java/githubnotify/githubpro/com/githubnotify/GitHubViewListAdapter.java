@@ -26,18 +26,18 @@ public class GitHubViewListAdapter extends BaseAdapter{
     private LayoutInflater mInflater;
     public List<DataCommit> myItems;
     private Activity activity;
-    private GitHubViewListAdapter listAdapter;
+    public static GitHubViewListAdapter listAdapter;
     public GitHubViewListAdapter(Activity activity) {
         initGitHub();
         this.activity = activity;
         listAdapter = this;
         mInflater = (LayoutInflater) (activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE));
-        updateThread();
+
     }
 
     public void updateComments(){
         myItems = gitHub.getListCommits();
-        notifyDataSetChanged();
+        updateThread();
     }
 
     public int getCount(){
@@ -100,10 +100,11 @@ public class GitHubViewListAdapter extends BaseAdapter{
     void updateThread() {
         Runnable task = new Runnable() {
             public void run() {
-                updateComments();
                 activity.runOnUiThread (new Thread(new Runnable() {
                     public void run(){
-                        notifyDataSetChanged();
+
+                        listAdapter.notifyDataSetChanged();
+//                        ((MainActivity)activity).mNavigationDrawerFragment.getTargetFragment().;
                     }
                 }));
             }
