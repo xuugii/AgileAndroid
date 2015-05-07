@@ -11,7 +11,7 @@ import android.view.View;
 /**
  * Created by Louis on 03/05/2015.
  */
-public class PlanningPokerView {
+public class PlanningPokerView implements IFragmentView{
     public static int COL = 3;
     private LinearLayout grid;
     private Activity activity;

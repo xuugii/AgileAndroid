@@ -187,7 +187,7 @@ public class MainActivity extends ActionBarActivity
             switch (menu) {
                 case 1:
                     if (savedView == null) {
-                        savedView = (new GitHubView(activity)).getListView();
+                        savedView = (new GitHubView(activity)).getView();
                         return savedView;
                     }
                     return savedView;
@@ -210,45 +210,9 @@ public class MainActivity extends ActionBarActivity
                     release.setOnClickListener((OnClickListener) activity);
                     return rootViewService;
                 case 5:
-//                    TODO: use notification class
                     final View notificationService = inflater.inflate(R.layout.notification_view, container, false);
+                    return (new NotificationCenter(activity,notificationService)).getView();
 
-                    final NotificationManager mNotificationManager;
-
-                    mNotificationManager =
-                            (NotificationManager)activity.getSystemService(NOTIFICATION_SERVICE);
-                    final Notification notifyDetails =
-                            new Notification(R.drawable.android,
-                                    "You've got a new notification!",System.currentTimeMillis());
-
-                    Button start = (Button)notificationService.findViewById(R.id.notifyButton);
-                    Button cancel = (Button)notificationService.findViewById(R.id.cancelButton);
-
-                    start.setOnClickListener(new OnClickListener() {
-
-                        public void onClick(View v) {
-
-                            Context context = activity.getApplicationContext();
-                            CharSequence contentTitle =
-                                    "Notification Details...";
-                            CharSequence contentText =
-                                    "New Conflicting commit!";
-                            Intent notifyIntent =
-                                    new Intent(MainActivity.activity,LoginActivity.class);
-                            PendingIntent intent =
-                                    PendingIntent.getActivity(getActivity(), 0, notifyIntent, Intent.FILL_IN_DATA);
-                            notifyDetails.setLatestEventInfo(context,
-                                    contentTitle, contentText, intent);
-                            mNotificationManager.notify(SIMPLE_NOTFICATION_ID, notifyDetails);
-                        }
-                    });
-
-                    cancel.setOnClickListener(new OnClickListener() {
-                        public void onClick(View v) {
-                            mNotificationManager.cancel(SIMPLE_NOTFICATION_ID);
-                        }
-                    });
-                    return notificationService;
 
             }
             return rootView;

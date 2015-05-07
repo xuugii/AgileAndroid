@@ -1,4 +1,5 @@
 package githubnotify.githubpro.com.githubnotify;
+
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -16,41 +17,43 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 /**
  * Created by Uguudei on 5/6/2015.
  */
-public class NotificationCenter extends Activity
-{
+public class NotificationCenter implements IFragmentView {
 
     private NotificationManager mNotificationManager;
     private int SIMPLE_NOTFICATION_ID;
+    private Activity activity;
+    View notificationServiceView;
 
+    public NotificationCenter(Activity activity, View notificationServiceView) {
+        this.activity = activity;
+        this.notificationServiceView = notificationServiceView;
+    }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.notification_view);
+    public View getView(){
+        final NotificationManager mNotificationManager;
 
         mNotificationManager =
-                (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+                (NotificationManager)activity.getSystemService(activity.NOTIFICATION_SERVICE);
         final Notification notifyDetails =
                 new Notification(R.drawable.android,
                         "You've got a new notification!",System.currentTimeMillis());
 
-        Button start = (Button)findViewById(R.id.notifyButton);
-        Button cancel = (Button)findViewById(R.id.cancelButton);
+        Button start = (Button)notificationServiceView.findViewById(R.id.notifyButton);
+        Button cancel = (Button)notificationServiceView.findViewById(R.id.cancelButton);
 
         start.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
 
-                Context context = getApplicationContext();
+                Context context = activity.getApplicationContext();
                 CharSequence contentTitle =
                         "Notification Details...";
                 CharSequence contentText =
-                        "Browse Android Official Site by clicking me";
+                        "New Conflicting commit!";
                 Intent notifyIntent =
-                        new Intent(android.content.Intent.ACTION_VIEW,
-                                Uri.parse("http://www.android.com"));
+                        new Intent(MainActivity.activity,LoginActivity.class);
                 PendingIntent intent =
-                        PendingIntent.getActivity(NotificationCenter.this, 0, notifyIntent, Intent.FILL_IN_DATA);
+                        PendingIntent.getActivity(activity, 0, notifyIntent, Intent.FILL_IN_DATA);
                 notifyDetails.setLatestEventInfo(context,
                         contentTitle, contentText, intent);
                 mNotificationManager.notify(SIMPLE_NOTFICATION_ID, notifyDetails);
@@ -62,6 +65,7 @@ public class NotificationCenter extends Activity
                 mNotificationManager.cancel(SIMPLE_NOTFICATION_ID);
             }
         });
+        return notificationServiceView;
     }
 
 }
