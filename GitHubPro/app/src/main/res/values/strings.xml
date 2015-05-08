@@ -16,6 +16,7 @@
     <string name="username">Username</string>
     <string name="password">Password...</string>
     <string name="login">Log In</string>
+    <string name="skip">Skip</string>
     <string name="title_activity_display_tile">DisplayTile</string>
     <string name="notify">Send Notification</string>
     <string name="cancel">Cancel Notification</string>

@@ -53,6 +53,8 @@ public class MainActivity extends ActionBarActivity
     static Button release;
     public static int MENU_SIZE = 5;
     public static List<PlaceholderFragment> listFragment = new ArrayList<>();
+    enum State{loggedIn, skipped} ;
+    State state = State.loggedIn;
 
 
     /**
@@ -74,6 +76,10 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (!LoginActivity.loggedIn){
+            state = State.skipped;
+        }
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();

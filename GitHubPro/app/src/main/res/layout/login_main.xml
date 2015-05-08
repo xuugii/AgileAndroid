@@ -68,6 +68,13 @@
                 android:text="@string/login"
                 android:id="@+id/loginButton"
                 android:layout_gravity="right" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/skip"
+                android:id="@+id/loginSkipButton"
+                android:layout_gravity="right" />
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>
