@@ -26,10 +26,9 @@ import android.widget.Toast;
 /**
  * Created by Uguudei on 2015-04-22.
  */
-public class LoginActivity extends Activity implements OnClickListener{
+public class LoginActivity implements IFragmentView,OnClickListener{
 
     Button loginOk;
-    Button loginSkip;
     EditText loginEmail;
     EditText loginPassword;
     EditText loginToken;
@@ -39,30 +38,18 @@ public class LoginActivity extends Activity implements OnClickListener{
     public static String token;
     public static String repoName;
     public static boolean loggedIn = false;
-    private Intent main = new Intent(LoginActivity.this, MainActivity.class);
+    private Activity activity;
+    private View loginView;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.login_main);
-        loginOk = (Button) findViewById(R.id.loginButton);
-        loginSkip = (Button) findViewById(R.id.loginSkipButton);
-        loginEmail = (EditText) findViewById(R.id.loginEmail);
-        loginPassword = (EditText) findViewById(R.id.loginPassword);
-        loginToken = (EditText) findViewById(R.id.loginToken);
-        loginRepo = (EditText) findViewById(R.id.loginRepo);
-        loginOk.setOnClickListener(this);
-        loginSkip.setOnClickListener(this);
-    }
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-
+    protected LoginActivity(Activity activity, View loginView) {
+        this.activity = activity;
+        this.loginView = loginView;
+        loginOk = (Button) loginView.findViewById(R.id.loginButton);
+        loginEmail = (EditText) loginView.findViewById(R.id.loginEmail);
+        loginPassword = (EditText) loginView.findViewById(R.id.loginPassword);
+        loginToken = (EditText) loginView.findViewById(R.id.loginToken);
+        loginRepo = (EditText) loginView.findViewById(R.id.loginRepo);
+        loginOk.setOnClickListener((MainActivity)activity);
     }
 
     @Override
@@ -75,14 +62,11 @@ public class LoginActivity extends Activity implements OnClickListener{
                 String password = loginPassword.getText().toString();
                 String token = loginToken.getText().toString();
                 String repoName = loginRepo.getText().toString();
-                LoginActivity.login(userName,password, token, repoName);
-                LoginActivity.this.startActivity(main);
+                LoginActivity.login(userName, password, token, repoName);
             } else {
-                Toast toast = Toast.makeText(this, "Data is missing!", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(activity, "Data is missing!", Toast.LENGTH_LONG);
                 toast.show();
             }
-        } else if (loginSkip.isPressed()){
-            LoginActivity.this.startActivity(main);
         }
     }
 
@@ -102,5 +86,10 @@ public class LoginActivity extends Activity implements OnClickListener{
         token = "";
         repoName = "";
         loggedIn = false;
+    }
+
+    @Override
+    public View getView() {
+        return loginView;
     }
 }

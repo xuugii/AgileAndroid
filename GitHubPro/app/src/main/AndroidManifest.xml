@@ -17,23 +17,14 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
         <activity
-            android:name=".LoginActivity"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name" >
-        </activity>
-        <activity android:name=".NotificationCenter">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"></category>
             </intent-filter>
         </activity>
 
@@ -44,14 +35,6 @@
             android:name=".DisplayTile"
             android:label="@string/title_activity_display_tile"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-        </activity>
-        <activity
-            android:name=".SelectFiles"
-            android:label="@string/title_activity_select_files"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="githubnotify.githubpro.com.githubnotify.MainActivity" />
         </activity>
     </application>
 

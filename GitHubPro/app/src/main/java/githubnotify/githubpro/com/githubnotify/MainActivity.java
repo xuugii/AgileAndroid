@@ -1,10 +1,6 @@
 package githubnotify.githubpro.com.githubnotify;
 
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -17,9 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ScrollView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -30,13 +23,8 @@ import android.util.Log;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.LinearLayout;
 
 import java.util.ArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import java.util.List;
 
@@ -51,10 +39,10 @@ public class MainActivity extends ActionBarActivity
     static Button bind;
     static Button invoke;
     static Button release;
-    public static int MENU_SIZE = 5;
+    public static int MENU_SIZE = 6;
     public static List<PlaceholderFragment> listFragment = new ArrayList<>();
-    enum State{loggedIn, skipped} ;
-    State state = State.loggedIn;
+    enum State{loggedIn, logout} ;
+    static State state = State.loggedIn;
 
 
     /**
@@ -78,7 +66,7 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         if (!LoginActivity.loggedIn){
-            state = State.skipped;
+            state = State.logout;
         }
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -94,10 +82,12 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, listFragment.get(position))
                 .commit();
+
 
     }
 
@@ -118,6 +108,12 @@ public class MainActivity extends ActionBarActivity
             case 5:
                 mTitle = "Notification";
                 break;
+            case 6:
+                if (state == State.loggedIn)
+                    mTitle = "Logout";
+                else
+                    mTitle = "Login";
+
     }
     }
 
@@ -190,37 +186,57 @@ public class MainActivity extends ActionBarActivity
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             int menu = getArguments().getInt(ARG_SECTION_NUMBER);
-            switch (menu) {
-                case 1:
-                    if (savedView == null) {
-                        savedView = (new GitHubView(activity)).getView();
+            if (state == State.loggedIn) {
+                switch (menu) {
+                    case 1:
+                        if (savedView == null) {
+                            savedView = (new GitHubView(activity)).getView();
+                            return savedView;
+                        }
                         return savedView;
+                    case 2:
+                        return (new SelectFiles(activity)).getListView();
+                    case 3:
+                        return (new PlanningPokerView(activity)).getView();
+                    case 4:
+                        View rootViewService = inflater.inflate(R.layout.service_view, container, false);
+                        start = (Button) rootViewService.findViewById(R.id.serviceStart);
+                        stop = (Button) rootViewService.findViewById(R.id.serviceStop);
+                        bind = (Button) rootViewService.findViewById(R.id.serviceBind);
+                        invoke = (Button) rootViewService.findViewById(R.id.serviceInvoke);
+                        release = (Button) rootViewService.findViewById(R.id.serviceRelease);
+
+                        start.setOnClickListener((OnClickListener) activity);
+                        stop.setOnClickListener((OnClickListener) activity);
+                        bind.setOnClickListener((OnClickListener) activity);
+                        invoke.setOnClickListener((OnClickListener) activity);
+                        release.setOnClickListener((OnClickListener) activity);
+                        return rootViewService;
+                    case 5:
+                        final View notificationService = inflater.inflate(R.layout.notification_view, container, false);
+                        return (new NotificationCenter(activity, notificationService)).getView();
+                    case 6:
+                        final View logoutAbout = inflater.inflate(R.layout.login_logout_about_view, container, false);
+                        Button logout = (Button) logoutAbout.findViewById(R.id.loginLogout);
+                        logout.setOnClickListener(new OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                state = State.logout;
+                                LoginActivity.logout();
+                            }
+                        });
+                        return logoutAbout;
+                }
+            } else {
+                switch (menu) {
+                    case 3:
+                        return (new PlanningPokerView(activity)).getView();
+                    case 6:
+                        rootView = inflater.inflate(R.layout.login_main, container, false);
+                        return (new LoginActivity(activity,rootView)).getView();
                     }
-                    return savedView;
-                case 2:
-                    return (new SelectFiles(activity)).getListView();
-                case 3:
-                    return (new PlanningPokerView(activity)).getView();
-                case 4:
-                    View rootViewService = inflater.inflate(R.layout.service_view, container, false);
-                    start = (Button) rootViewService.findViewById(R.id.serviceStart);
-                    stop = (Button) rootViewService.findViewById(R.id.serviceStop);
-                    bind = (Button) rootViewService.findViewById(R.id.serviceBind);
-                    invoke = (Button) rootViewService.findViewById(R.id.serviceInvoke);
-                    release = (Button) rootViewService.findViewById(R.id.serviceRelease);
 
-                    start.setOnClickListener((OnClickListener) activity);
-                    stop.setOnClickListener((OnClickListener) activity);
-                    bind.setOnClickListener((OnClickListener) activity);
-                    invoke.setOnClickListener((OnClickListener) activity);
-                    release.setOnClickListener((OnClickListener) activity);
-                    return rootViewService;
-                case 5:
-                    final View notificationService = inflater.inflate(R.layout.notification_view, container, false);
-                    return (new NotificationCenter(activity,notificationService)).getView();
-
-
-            }
+                }
             return rootView;
         }
 
