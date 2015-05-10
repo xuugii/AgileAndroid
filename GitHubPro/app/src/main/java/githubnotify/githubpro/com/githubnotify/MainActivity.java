@@ -43,7 +43,7 @@ public class MainActivity extends ActionBarActivity
     static Button release;
     public static int MENU_SIZE = 6;
     public static List<PlaceholderFragment> listFragment = new ArrayList<>();
-    enum State{loggedIn, logout} ;
+    public enum State{loggedIn, logout} ;
     static State state = State.loggedIn;
 
 
@@ -79,6 +79,7 @@ public class MainActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
         activity = this;
+        onNavigationDrawerItemSelected(5);
     }
 
     @Override
@@ -92,6 +93,8 @@ public class MainActivity extends ActionBarActivity
 
 
     }
+
+
 
     public void onSectionAttached(int number) {
         switch (number) {
@@ -108,13 +111,10 @@ public class MainActivity extends ActionBarActivity
                 mTitle = getString(R.string.title_section4);
                 break;
             case 5:
-                mTitle = "Notification";
+                mTitle = getString(R.string.title_section5);
                 break;
             case 6:
-                if (state == State.loggedIn)
-                    mTitle = "Logout";
-                else
-                    mTitle = "Login";
+                mTitle = getString(R.string.title_section6);
 
     }
     }
@@ -225,6 +225,7 @@ public class MainActivity extends ActionBarActivity
                             public void onClick(View v) {
                                 state = State.logout;
                                 LoginActivity.logout();
+                                ((MainActivity)activity).onNavigationDrawerItemSelected(4);
                             }
                         });
                         return logoutAbout;
@@ -249,12 +250,6 @@ public class MainActivity extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
-
-    /**
-     * Network on another thread
-     */
-
-
 
     /**
      * Remote Service Helper
@@ -379,17 +374,19 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onClick(View view) {
-        if (start.isPressed()){
-            startService();
-        } else if (stop.isPressed()){
-            stopService();
-        } else if (bind.isPressed()){
-            bindService();
-        } else if (invoke.isPressed()){
-            invokeService();
-        } else if (release.isPressed()){
-            releaseService();
+
+        if (start != null) {
+            if (start.isPressed()){
+                startService();
+            } else if (stop.isPressed()){
+                stopService();
+            } else if (bind.isPressed()){
+                bindService();
+            } else if (invoke.isPressed()){
+                invokeService();
+            } else if (release.isPressed()){
+                releaseService();
+            }
         }
     }
-
 }

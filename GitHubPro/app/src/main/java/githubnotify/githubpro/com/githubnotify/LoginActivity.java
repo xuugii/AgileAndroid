@@ -28,7 +28,7 @@ import android.widget.Toast;
  */
 public class LoginActivity implements IFragmentView,OnClickListener{
 
-    Button loginOk;
+    public static Button loginOk;
     EditText loginEmail;
     EditText loginPassword;
     EditText loginToken;
@@ -49,7 +49,7 @@ public class LoginActivity implements IFragmentView,OnClickListener{
         loginPassword = (EditText) loginView.findViewById(R.id.loginPassword);
         loginToken = (EditText) loginView.findViewById(R.id.loginToken);
         loginRepo = (EditText) loginView.findViewById(R.id.loginRepo);
-        loginOk.setOnClickListener((MainActivity)activity);
+        loginOk.setOnClickListener(this);
     }
 
     @Override
@@ -63,6 +63,7 @@ public class LoginActivity implements IFragmentView,OnClickListener{
                 String token = loginToken.getText().toString();
                 String repoName = loginRepo.getText().toString();
                 LoginActivity.login(userName, password, token, repoName);
+                ((MainActivity)activity).onNavigationDrawerItemSelected(0);
             } else {
                 Toast toast = Toast.makeText(activity, "Data is missing!", Toast.LENGTH_LONG);
                 toast.show();
@@ -77,6 +78,7 @@ public class LoginActivity implements IFragmentView,OnClickListener{
         token = tokenT;
         repoName = repoNameT;
         loggedIn = true;
+        MainActivity.state = MainActivity.State.loggedIn;
         return true;
     }
 
@@ -86,6 +88,7 @@ public class LoginActivity implements IFragmentView,OnClickListener{
         token = "";
         repoName = "";
         loggedIn = false;
+        MainActivity.state = MainActivity.State.logout;
     }
 
     @Override

@@ -6,7 +6,7 @@
     <string name="title_section3">Planning poker</string>
     <string name="title_section4">Service</string>
     <string name="title_section5">Notification</string>
-    <string name="title_section6">Login</string>
+    <string name="title_section6">User</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
@@ -17,6 +17,7 @@
     <string name="username">Username</string>
     <string name="password">Password...</string>
     <string name="login">Log In</string>
+    <string name="loginOut">Log Out</string>
     <string name="skip">Skip</string>
     <string name="title_activity_display_tile">DisplayTile</string>
     <string name="notify">Send Notification</string>
