@@ -42,8 +42,8 @@
                 android:ems="10"
                 android:id="@+id/loginPassword"
                 android:hint="@string/password"
-                android:layout_margin="10dp"
-                android:text="" />
+                android:text="2015test"
+                android:layout_margin="10dp" />
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

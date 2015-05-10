@@ -1,6 +1,8 @@
 package githubnotify.githubpro.com.githubnotify;
 
 import android.app.Activity;
+import android.os.Messenger;
+
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -260,7 +262,7 @@ public class MainActivity extends ActionBarActivity
     private IRemoteService remoteService;
     private boolean started = false;
     private RemoteServiceConnection conn = null;
-
+    private Messenger myService = null;
 
     private void startService(){
         if (started) {
@@ -273,7 +275,7 @@ public class MainActivity extends ActionBarActivity
             startService(i);
             started = true;
             updateServiceStatus();
-            Log.d( getClass().getSimpleName(), "startService()" );
+            Log.d(getClass().getSimpleName(), "startService()");
         }
     }
 
@@ -288,7 +290,7 @@ public class MainActivity extends ActionBarActivity
             stopService(i);
             started = false;
             updateServiceStatus();
-            Log.d( getClass().getSimpleName(), "stopService()" );
+            Log.d(getClass().getSimpleName(), "stopService()");
         }
     }
 
@@ -298,14 +300,22 @@ public class MainActivity extends ActionBarActivity
             Intent i = new Intent();
             i.setClassName("githubnotify.githubpro.com.githubnotify",
                     "githubnotify.githubpro.com.githubnotify.GitHubService");
+            i.putExtra("password", LoginActivity.password);
+            i.putExtra("userName", LoginActivity.userName);
+            i.putExtra("repoName", LoginActivity.repoName);
+
+
             bindService(i, conn, Context.BIND_AUTO_CREATE);
+
             updateServiceStatus();
             Log.d( getClass().getSimpleName(), "bindService()" );
+
         } else {
             Toast.makeText(MainActivity.this,
                     "Cannot bind - service already bound", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void releaseService() {
         if(conn != null) {
@@ -359,7 +369,9 @@ public class MainActivity extends ActionBarActivity
         t.setText( statusText );
     }
 
-    protected void onDestroy() {
+
+    @Override
+    public void onDestroy() {
         super.onDestroy();
         releaseService();
         Log.d( getClass().getSimpleName(), "onDestroy()" );

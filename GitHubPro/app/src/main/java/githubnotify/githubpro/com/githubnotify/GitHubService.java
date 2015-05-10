@@ -1,11 +1,21 @@
 package githubnotify.githubpro.com.githubnotify;
 
+import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+
+import org.eclipse.egit.github.core.client.GitHubClient;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -18,15 +28,36 @@ import java.util.concurrent.TimeUnit;
 public class GitHubService extends Service{
     private Handler serviceHandler;
     private int counter;
-    private int initSizeCommit;
-    private int changeSizeCommit;
+    private volatile int initSizeCommit = -1;
+    private volatile int changeSizeCommit;
+    private boolean firstTime = true;
     private Task myTask = new Task();
-
-
+    private String userName;
+    private String password;
+    private String repoName;
+    private boolean bound = false;
     @Override
     public IBinder onBind(Intent arg0) {
         Log.d(getClass().getSimpleName(), "onBind()");
+        bound = true;
+        if (userName == null || userName == "") {
+
+            Bundle b = arg0.getExtras();
+
+            Log.d(getClass().getSimpleName(), "onBind"+ b.getString("userName"));
+
+            Log.d(getClass().getSimpleName(), arg0.getStringExtra("userName"));
+            userName = b.getString("userName");
+            password = b.getString("password");
+            repoName = b.getString("repoName");
+        }
         return remoteServiceStub;
+    }
+    @Override
+    public boolean onUnbind(Intent intent){
+        Log.d(getClass().getSimpleName(), "onUnbind");
+        bound = false;
+        return onUnbind(intent);
     }
 
     private IRemoteService.Stub remoteServiceStub =
@@ -39,10 +70,32 @@ public class GitHubService extends Service{
                     return changeSizeCommit;
                 }};
 
+    NotificationManager mNotificationManager;
+    Notification notifyDetails;
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mNotificationManager =
+                (NotificationManager)getApplicationContext().getSystemService(this.NOTIFICATION_SERVICE);
+        notifyDetails =
+                new Notification(R.drawable.android,
+                        "You've got a new notification!",System.currentTimeMillis());
+        Context context = getApplicationContext();
+        CharSequence contentTitle = "Notification Details...";
+        CharSequence contentText = "New Conflicting commit!";
+        Intent notifyIntent = new Intent(MainActivity.activity,LoginActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notifyIntent, Intent.FILL_IN_DATA);
+        notifyDetails.setLatestEventInfo(context, contentTitle, contentText, pendingIntent);
+
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
 //        initSizeCommit = GitHubViewListAdapter.gitHub.getListCommits().size();
+        bound = false;
         Log.d(getClass().getSimpleName(),"onCreate()");
 
     }
@@ -58,20 +111,43 @@ public class GitHubService extends Service{
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
+        if (userName == null || userName == "") {
+            userName = LoginActivity.userName;
+            password = LoginActivity.password;
+            gitHub = GitHubViewListAdapter.gitHub;
+            repoName = LoginActivity.repoName;
+            Log.d(getClass().getSimpleName(), "onStart"+intent.getStringExtra("userName"));
+        }
         serviceHandler = new Handler();
         serviceHandler.postDelayed(myTask, 1000L);
         Log.d(getClass().getSimpleName(), "onStart()");
     }
 
 
-    private final ScheduledExecutorService worker = Executors
-            .newSingleThreadScheduledExecutor();
-
-    public void getCommit(){
+    public volatile boolean showOnceNotification = true;
+    public synchronized void getCommit(){
         Runnable task = new Runnable() {
             public void run() {
 //                TODO: make GitHubServer that stores all the list and information
-                changeSizeCommit=GitHubViewListAdapter.gitHub.getListCommits().size();
+                if (gitHub == null) {
+                    initGitHub();
+                } else {
+                    changeSizeCommit = GitHubViewListAdapter.gitHub.getListCommits().size();
+                    if (firstTime) {
+                        initSizeCommit = changeSizeCommit;
+                        firstTime = false;
+                    }
+                    if (initSizeCommit != -1){
+                        if (changeSizeCommit > initSizeCommit){
+                            mNotificationManager.notify(0, notifyDetails);
+                         }
+                    }
+                    if (showOnceNotification && counter>=20){
+                        mNotificationManager.notify(0, notifyDetails);
+                        showOnceNotification = false;
+                    }
+
+                }
             }
         };
         worker.schedule(task, 0, TimeUnit.SECONDS);
@@ -80,10 +156,26 @@ public class GitHubService extends Service{
     class Task implements Runnable {
         public void run() {
             ++counter;
-            getCommit();
-            serviceHandler.postDelayed(this,10000L);
+            if (bound)
+                getCommit();
+            serviceHandler.postDelayed(this,1000L);
             Log.i(getClass().getSimpleName(),
                     "Incrementing counter in the run method");
         }
+    }
+
+//    Help function with Github
+private static final ScheduledExecutorService worker = Executors
+        .newSingleThreadScheduledExecutor();
+
+    GitHubParser gitHub = null;
+
+    void initGitHub(){
+        Runnable task = new Runnable() {
+            public void run() {
+                    gitHub = new GitHubParser(userName,password, LoginActivity.repoName);
+            }
+        };
+        worker.schedule(task, 0, TimeUnit.SECONDS);
     }
 }

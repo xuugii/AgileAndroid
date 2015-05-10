@@ -29,6 +29,10 @@ public class NotificationCenter implements IFragmentView {
         this.notificationServiceView = notificationServiceView;
     }
 
+    public NotificationCenter(Activity activity) {
+        this.activity = activity;
+    }
+
     public View getView(){
         final NotificationManager mNotificationManager;
 
@@ -44,19 +48,7 @@ public class NotificationCenter implements IFragmentView {
         start.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
-
-                Context context = activity.getApplicationContext();
-                CharSequence contentTitle =
-                        "Notification Details...";
-                CharSequence contentText =
-                        "New Conflicting commit!";
-                Intent notifyIntent =
-                        new Intent(MainActivity.activity,LoginActivity.class);
-                PendingIntent intent =
-                        PendingIntent.getActivity(activity, 0, notifyIntent, Intent.FILL_IN_DATA);
-                notifyDetails.setLatestEventInfo(context,
-                        contentTitle, contentText, intent);
-                mNotificationManager.notify(SIMPLE_NOTFICATION_ID, notifyDetails);
+                showNotification(activity, notifyDetails);
             }
         });
 
@@ -66,6 +58,27 @@ public class NotificationCenter implements IFragmentView {
             }
         });
         return notificationServiceView;
+    }
+
+    public void requestNotification(){
+        final NotificationManager mNotificationManager;
+
+        mNotificationManager =
+                (NotificationManager)activity.getSystemService(activity.NOTIFICATION_SERVICE);
+        final Notification notifyDetails =
+                new Notification(R.drawable.android,
+                        "You've got a new notification!",System.currentTimeMillis());
+        showNotification(activity, notifyDetails);
+    }
+
+    public void showNotification(Activity activity, Notification notifyDetails){
+        Context context = activity.getApplicationContext();
+        CharSequence contentTitle = "Notification Details...";
+        CharSequence contentText = "New Conflicting commit!";
+        Intent notifyIntent = new Intent(MainActivity.activity,LoginActivity.class);
+        PendingIntent intent = PendingIntent.getActivity(activity, 0, notifyIntent, Intent.FILL_IN_DATA);
+        notifyDetails.setLatestEventInfo(context, contentTitle, contentText, intent);
+        mNotificationManager.notify(SIMPLE_NOTFICATION_ID, notifyDetails);
     }
 
 }
