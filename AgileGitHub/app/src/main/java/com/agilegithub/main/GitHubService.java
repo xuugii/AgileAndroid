@@ -6,10 +6,12 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.concurrent.Executors;
@@ -66,23 +68,30 @@ public class GitHubService extends Service {
                 }};
 
     NotificationManager mNotificationManager;
-    Notification notifyDetails;
+    NotificationCompat.Builder notifyDetails;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mNotificationManager =
                 (NotificationManager)getApplicationContext().getSystemService(this.NOTIFICATION_SERVICE);
 //        TODO: fix the icon for the notification
-        notifyDetails =
-                new Notification(R.drawable.ic_launcher,
-                        "You've got a new notification!", System.currentTimeMillis());
+
         Context context = getApplicationContext();
         CharSequence contentTitle = "Notification Details...";
         CharSequence contentText = "New Conflicting commit!";
         Intent notifyIntent = new Intent(MainActivity.activity,MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notifyIntent, Intent.FILL_IN_DATA);
-        notifyDetails.setLatestEventInfo(context, contentTitle, contentText, pendingIntent);
 
+        notifyDetails =
+                new NotificationCompat.Builder(MainActivity.activity)
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle(contentTitle)
+                        .setContentText(contentText)
+                        .setContentIntent(pendingIntent);
+        notifyDetails.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
+
+        //LED
+        notifyDetails.setLights(Color.YELLOW, 3000, 3000);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -135,11 +144,11 @@ public class GitHubService extends Service {
                     }
                     if (initSizeCommit != -1){
                         if (changeSizeCommit > initSizeCommit){
-                            mNotificationManager.notify(0, notifyDetails);
+                            mNotificationManager.notify(0, notifyDetails.build());
                          }
                     }
-                    if (showOnceNotification && counter>=20){
-                        mNotificationManager.notify(0, notifyDetails);
+                    if (showOnceNotification && counter>=10){
+                        mNotificationManager.notify(0, notifyDetails.build());
                         showOnceNotification = false;
                     }
 

@@ -6,8 +6,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -23,7 +25,7 @@ public class NotificationCenter implements IFragmentView {
     private int SIMPLE_NOTFICATION_ID;
     private Activity activity;
     View notificationServiceView;
-
+    NotificationCompat.Builder notifyDetails;
     public NotificationCenter(Activity activity, View notificationServiceView) {
         this.activity = activity;
         this.notificationServiceView = notificationServiceView;
@@ -34,9 +36,7 @@ public class NotificationCenter implements IFragmentView {
 
         mNotificationManager =
                 (NotificationManager)activity.getSystemService(activity.NOTIFICATION_SERVICE);
-        final Notification notifyDetails =
-                new Notification(R.drawable.ic_launcher,
-                        "You've got a new notification!",System.currentTimeMillis());
+
 
         Button start = (Button)notificationServiceView.findViewById(R.id.notifyButton);
         Button cancel = (Button)notificationServiceView.findViewById(R.id.cancelButton);
@@ -54,9 +54,18 @@ public class NotificationCenter implements IFragmentView {
                         new Intent(MainActivity.activity, LoginActivity.class);
                 PendingIntent intent =
                         PendingIntent.getActivity(activity, 0, notifyIntent, Intent.FILL_IN_DATA);
-                notifyDetails.setLatestEventInfo(context,
-                        contentTitle, contentText, intent);
-                mNotificationManager.notify(SIMPLE_NOTFICATION_ID, notifyDetails);
+                notifyDetails =
+                        new NotificationCompat.Builder(MainActivity.activity)
+                                .setSmallIcon(R.drawable.ic_launcher)
+                                .setContentTitle(contentTitle)
+                                .setContentText(contentText)
+                                .setContentIntent(intent);
+                notifyDetails.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
+
+                //LED
+                notifyDetails.setLights(Color.YELLOW, 3000, 3000);
+
+                mNotificationManager.notify(SIMPLE_NOTFICATION_ID, notifyDetails.build());
             }
         });
 
