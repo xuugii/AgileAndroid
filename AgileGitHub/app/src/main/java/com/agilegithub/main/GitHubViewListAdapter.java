@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,6 +23,36 @@ public class GitHubViewListAdapter extends BaseAdapter {
     public List<DataCommit> myItems;
     private Activity activity;
     public static GitHubViewListAdapter listAdapter;
+
+    public static String sha;
+    public static ArrayList<Files> commitFiles;
+
+    public void CommitFiles(){
+        initCommitFiles();
+    }
+
+    public void updateCommitFiles(){
+        commitFiles = gitHub.getListFiles(sha);
+        updateThread();
+    }
+
+    public void initCommitFiles(){
+        Runnable task = new Runnable() {
+            public void run() {
+                updateCommitFiles();
+            }
+        };
+        worker.schedule(task, 0, TimeUnit.SECONDS);
+    }
+
+    public ArrayList<Files> getCommitFiles() {
+        return commitFiles;
+    }
+
+    public void setSha(String sha_){
+        sha = sha_;
+    }
+
     public GitHubViewListAdapter(Activity activity) {
         initGitHub();
         this.activity = activity;

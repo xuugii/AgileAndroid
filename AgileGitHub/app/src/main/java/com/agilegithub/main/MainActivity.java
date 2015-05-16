@@ -63,6 +63,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	public static List<PlaceholderFragment> listFragment = new ArrayList<PlaceholderFragment>();
 	public enum State{loggedIn, logout} ;
 	static State state = State.logout;
+	static ArrayList<Files> selectedFilesList;
 
 	public MainActivity(){
 		for (int i = 0; i < MENU_SIZE; i++) {
@@ -144,6 +145,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			// on first time display view for first nav item
 			displayView(0);
 		}
+
+		selectedFilesList = new ArrayList<Files>();
 	}
 
 	/**
@@ -429,7 +432,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						});
 						return logoutAbout;
 					case 2:
-						return (new SelectFiles(activity)).getListView();
+						return (new SelectFiles(activity, selectedFilesList)).getListView();
 					case 3:
 						if (savedView == null) {
 							savedView = (new GitHubView(activity)).getView();

@@ -14,25 +14,23 @@ public class SelectFiles {
     ArrayList<Files> filesList;
     FilesAdapter fsAdapter;
 
-    public SelectFiles(Activity activity) {
+    public SelectFiles(Activity activity, ArrayList<Files> filesList_) {
+
         lv = new ListView(activity);
 
-        filesList = new ArrayList<Files>();
-        filesList.add(new Files("Main.java", "/src/main/"));
-        filesList.add(new Files("Login.java", "/src/login/"));
+        if (!filesList_.isEmpty()) {
+            filesList = filesList_;
+            fsAdapter = new FilesAdapter(filesList, activity);
 
-        // TODO: get file names here
-
-        fsAdapter = new FilesAdapter(filesList, activity);
-        lv.setAdapter(fsAdapter);
-
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                CheckBox chk = (CheckBox) view.findViewById(R.id.chk_box);
-                chk.performClick();
-            }
-        });
+            lv.setAdapter(fsAdapter);
+            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    CheckBox chk = (CheckBox) view.findViewById(R.id.chk_box);
+                    chk.performClick();
+                }
+            });
+        }
     }
 
     public ListView getListView(){

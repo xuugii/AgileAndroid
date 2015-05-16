@@ -3,6 +3,7 @@ package com.agilegithub.main;
 import android.util.Log;
 
 import org.eclipse.egit.github.core.Commit;
+import org.eclipse.egit.github.core.CommitFile;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -121,6 +122,42 @@ public class GitHubParser {
             e.printStackTrace();
         }
         return tmp;
+    }
+
+    public ArrayList<Files> getListFiles(String sha){
+        try {
+            ArrayList<Files> tmp = new ArrayList<Files>();
+            for (Repository repo : service.getRepositories()){
+                if (repo.getName().equals(repoName)) {
+                    List<RepositoryCommit> lst = commitService.getCommits(repo);
+                    int size = lst.size();
+                    for (int i = 0; i < size; i++) {
+                        Commit commit = lst.get(i).getCommit();
+                        String url = commit.getUrl();
+                        url = url.substring(url.lastIndexOf('/') + 1);
+                        if (url.equals(sha)){
+
+                            List<CommitFile> modifiedFiles = commitService.getCommit(repo, sha).getFiles();
+                            for (CommitFile file: modifiedFiles)
+                            {
+                                tmp.add(new Files(file.getFilename(), file.getRawUrl()));
+                            }
+
+                            // TODO: get project files here instead of getting commit-related files
+                            // Note that we only need files prior to a selected commit
+                            // So we shall probably use commit's SHA in "getAllFiles" method
+
+                            break;
+                        }
+                    }
+                    return tmp;
+                }
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public List<File> getRepoFiles(){
