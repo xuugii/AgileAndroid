@@ -6,8 +6,11 @@ import org.eclipse.egit.github.core.Commit;
 import org.eclipse.egit.github.core.CommitFile;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
+import org.eclipse.egit.github.core.RepositoryContents;
+import org.eclipse.egit.github.core.SearchRepository;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.CommitService;
+import org.eclipse.egit.github.core.service.ContentsService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
 import java.io.File;
@@ -26,6 +29,9 @@ public class GitHubParser {
     GitHubClient client;
     RepositoryService service;
     CommitService commitService;
+    RepositoryService repositoryService;
+    SearchRepository searchRepository;
+    ContentsService contentsService;
     //TODO: check user name!
     public String userName = "xuugii";
 
@@ -96,6 +102,14 @@ public class GitHubParser {
             client.setCredentials(user, password);
         service = new RepositoryService(client);
         commitService = new CommitService(client);
+        repositoryService = new RepositoryService(client);
+        contentsService = new ContentsService(client);
+        try {
+            searchRepository = service.searchRepositories(repoName).get(0);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     public List<DataCommit> getListCommits(){
@@ -122,6 +136,29 @@ public class GitHubParser {
             e.printStackTrace();
         }
         return tmp;
+    }
+
+    public ArrayList<RepositoryContents> getRepoFiles() throws IOException {
+        ArrayList<RepositoryContents> tmp = new ArrayList<>();
+        dirFlatten(tmp, "");
+        System.out.println("Size of the files: " + tmp.size());
+        return tmp;
+    }
+
+    private void dirFlatten(ArrayList<RepositoryContents> savedArray, String dirPath) throws IOException{
+        List<RepositoryContents> files;
+        if (dirPath == null || dirPath == "")
+            files = contentsService.getContents(searchRepository);
+        else
+            files = contentsService.getContents(searchRepository, dirPath);
+        for (int i = 0; i < files.size(); i++) {
+            if (files.get(i).getType().equals(RepositoryContents.TYPE_DIR)){
+                dirFlatten(savedArray, files.get(i).getPath());
+            } else {
+                savedArray.add(files.get(i));
+            }
+        }
+
     }
 
     public ArrayList<Files> getListFiles(String sha){
@@ -159,34 +196,6 @@ public class GitHubParser {
         }
         return null;
     }
-
-    public List<File> getRepoFiles(){
-        try {
-            for (Repository repo : service.getRepositories()){
-                if (repo.getName().equals(repoName)) {
-                    Repository d = repo.getSource();
-                    List<RepositoryCommit> list = commitService.getCommits(repo);
-                    int size = list.size();
-                    for (int i = 0; i < size; i++) {
-                        DataCommit dataCommit = new DataCommit();
-                        Commit commit = list.get(i).getCommit();
-                        commit.getTree();
-                        dataCommit.author = commit.getCommitter().getEmail();
-                        dataCommit.date = commit.getCommitter().getDate();
-                        dataCommit.commitMessage = commit.getMessage();
-//                        tmp.add(dataCommit);
-                    }
-                    return null;
-                }
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
 
     public static void main(String[] args) {
         // TODO Auto-generated method stub
