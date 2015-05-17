@@ -59,7 +59,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	static Button bind;
 	static Button invoke;
 	static Button release;
-	public static int MENU_SIZE = 6;
+	public static int MENU_SIZE = 7;
 	public static List<PlaceholderFragment> listFragment = new ArrayList<PlaceholderFragment>();
 	public enum State{loggedIn, logout} ;
 	static State state = State.logout;
@@ -106,6 +106,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		navDrawerItems.add(new NavDrawerItem(navMenuTitles[4], navMenuIcons.getResourceId(4, -1)));
 		// What's hot, We  will add a counter here
 		navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons.getResourceId(5, -1), true, "50+"));
+
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[6], navMenuIcons.getResourceId(6, -1), true, "50+"));
 		
 
 		// Recycle the typed array
@@ -458,6 +460,11 @@ public class MainActivity extends Activity implements OnClickListener {
 						invoke.setOnClickListener((View.OnClickListener) activity);
 						release.setOnClickListener((View.OnClickListener) activity);
 						return rootViewService;
+                    case 7:
+                        if (savedView == null) {
+                            savedView = (new CommitExpandListView(activity)).getView();
+                            return savedView;
+                        }
 
 				}
 			} else {
@@ -467,6 +474,11 @@ public class MainActivity extends Activity implements OnClickListener {
 					case 1:
 						rootView = inflater.inflate(R.layout.login_main, container, false);
 						return (new LoginActivity(activity, rootView)).getView();
+                    case 7:
+                        if (savedView == null) {
+                            savedView = (new CommitExpandListView(activity)).getView();
+                            return savedView;
+                        }
 				}
 
 			}

@@ -2,12 +2,14 @@ package com.agilegithub.main;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -23,6 +25,7 @@ public class GitHubViewListAdapter extends BaseAdapter {
     public List<DataCommit> myItems;
     private Activity activity;
     public static GitHubViewListAdapter listAdapter;
+    public String TAG = "GitHubViewListAdapter";
 
     public static String sha;
     public static ArrayList<Files> commitFiles;
@@ -123,6 +126,7 @@ public class GitHubViewListAdapter extends BaseAdapter {
         worker.schedule(task, 0, TimeUnit.SECONDS);
     }
 
+    // update user Interface
     void updateThread() {
         Runnable task = new Runnable() {
             public void run() {
@@ -136,6 +140,19 @@ public class GitHubViewListAdapter extends BaseAdapter {
             }
         };
         worker.schedule(task, 0, TimeUnit.SECONDS);
+
+        Runnable task1 = new Runnable() {
+            public void run() {
+                for (int i = 0; i < myItems.size()-1; i++) {
+                    try {
+                        myItems.get(i).changedFiles = gitHub.getChangedFiles(myItems.get(i+1).sha, myItems.get(i).sha);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error in updateThread: " + e.getMessage());
+                    }
+                }
+            }
+        };
+        worker.schedule(task1, 0, TimeUnit.SECONDS);
     }
 }
 

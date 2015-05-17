@@ -41,6 +41,11 @@
             android:label="@string/title_activity_display_tile"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>
+        <activity
+            android:name=".DisplayWebView"
+            android:label="@string/web_activity_display_tile"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+        </activity>
     </application>
 
 </manifest>

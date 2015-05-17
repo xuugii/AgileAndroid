@@ -10,10 +10,11 @@
     <string-array name="nav_drawer_items">
         <item >Home</item>
         <item >Select Files</item>
-        <item >Commits</item>
+        <item >Conflict Status</item>
         <item >Planning Poker</item>
         <item >Notification</item>
         <item >Service</item>
+        <item >Commits/Changes</item>
     </string-array>
 
     <array name="nav_drawer_icons">
@@ -22,6 +23,7 @@
         <item>@drawable/commit</item>
         <item>@drawable/poker</item>
         <item>@drawable/ic_pages</item>
+        <item>@drawable/ic_whats_hot</item>
         <item>@drawable/ic_whats_hot</item>
     </array>
 
@@ -45,6 +47,7 @@
     <string name="loginOut">Log Out</string>
     <string name="skip">Skip</string>
     <string name="title_activity_display_tile">DisplayTile</string>
+    <string name="web_activity_display_tile">WebView</string>
     <string name="notify">Send Notification</string>
     <string name="cancel">Cancel Notification</string>
 

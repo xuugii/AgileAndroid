@@ -6,6 +6,7 @@ import org.eclipse.egit.github.core.Commit;
 import org.eclipse.egit.github.core.CommitFile;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
+import org.eclipse.egit.github.core.RepositoryCommitCompare;
 import org.eclipse.egit.github.core.RepositoryContents;
 import org.eclipse.egit.github.core.SearchRepository;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Created by Uguudei on 4/21/2015.
@@ -112,8 +114,15 @@ public class GitHubParser {
         }
     }
 
+    public ArrayList<CommitFile> getChangedFiles(String baseSha, String headSha) throws IOException{
+        ArrayList <CommitFile> tmp = new ArrayList<CommitFile>();
+        RepositoryCommitCompare com = commitService.compare(searchRepository, baseSha, headSha);
+        tmp.addAll(com.getFiles());
+        return tmp;
+    }
+
     public List<DataCommit> getListCommits(){
-        List<DataCommit> tmp = new ArrayList<>();
+        List<DataCommit> tmp = new Vector<>();
         try {
             for (Repository repo : service.getRepositories()){
                 if (repo.getName().equals(repoName)) {
@@ -125,6 +134,7 @@ public class GitHubParser {
                         dataCommit.author = commit.getCommitter().getEmail();
                         dataCommit.date = commit.getCommitter().getDate();
                         dataCommit.commitMessage = commit.getMessage();
+                        dataCommit.sha =  list.get(i).getSha();
                         tmp.add(dataCommit);
                     }
                     return tmp;
