@@ -43,6 +43,7 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
         this.context = context;
         this.commits = commits;
         listAdapter = this;
+        listAdapter.
         commits = new ArrayList<>();
     }
 
@@ -177,7 +178,6 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
                 for (int i = 0; i < commits.size()-1; i++) {
                     try {
                         commits.get(i).changedFiles = gitHub.getChangedFiles(commits.get(i+1).sha, commits.get(i).sha);
-                        Log.e(TAG, "got: " + commits.get(i).changedFiles);
                     } catch (IOException e) {
                         Log.e(TAG, "Error in updateThread: " + e.getMessage());
                     }

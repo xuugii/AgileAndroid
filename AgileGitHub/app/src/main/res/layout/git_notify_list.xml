@@ -2,8 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/card"
-    android:longClickable="true">
+    android:background="@drawable/card">
  	<ImageView 
  	    android:src="@drawable/avatar"
  	    android:layout_height="35dp"

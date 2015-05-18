@@ -64,6 +64,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	public enum State{loggedIn, logout} ;
 	static State state = State.logout;
 	static ArrayList<Files> selectedFilesList;
+    public static boolean debug = true;
+    public static String TAG = "MainActivity";
 
 	public MainActivity(){
 		for (int i = 0; i < MENU_SIZE; i++) {
@@ -266,7 +268,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			startService(i);
 			started = true;
 			updateServiceStatus();
-			Log.d(getClass().getSimpleName(), "startService()");
+			Log.d(TAG, "startService()");
 		}
 	}
 
@@ -281,7 +283,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			stopService(i);
 			started = false;
 			updateServiceStatus();
-			Log.d(getClass().getSimpleName(), "stopService()");
+			Log.d(TAG, "stopService()");
 		}
 	}
 
@@ -299,7 +301,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			bindService(i, conn, Context.BIND_AUTO_CREATE);
 
 			updateServiceStatus();
-			Log.d( getClass().getSimpleName(), "bindService()" );
+			Log.d( TAG, "bindService()" );
 
 		} else {
 			Toast.makeText(MainActivity.this,
@@ -313,7 +315,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			unbindService(conn);
 			conn = null;
 			updateServiceStatus();
-			Log.d( getClass().getSimpleName(), "releaseService()" );
+			Log.d( TAG, "releaseService()" );
 		} else {
 			Toast.makeText(MainActivity.this,
 					"Cannot unbind - service not bound", Toast.LENGTH_SHORT).show();
@@ -330,9 +332,9 @@ public class MainActivity extends Activity implements OnClickListener {
 				int changeCommitSize = remoteService.getCommitSize();
 				TextView t = (TextView)findViewById(R.id.serviceCounter);
 				t.setText( "Counter value: "+Integer.toString( counter ) + "CommitSize: " + Integer.toString(changeCommitSize));
-				Log.d( getClass().getSimpleName(), "invokeService()" );
+				Log.d( TAG, "invokeService()" );
 			} catch (RemoteException re) {
-				Log.e( getClass().getSimpleName(), "RemoteException" );
+				Log.e( TAG, "RemoteException" );
 			}
 		}
 	}
@@ -341,13 +343,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		public void onServiceConnected(ComponentName className,
 									   IBinder boundService ) {
 			remoteService = IRemoteService.Stub.asInterface(boundService);
-			Log.d( getClass().getSimpleName(), "onServiceConnected()" );
+			Log.d( TAG, "onServiceConnected()" );
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
 			remoteService = null;
 			updateServiceStatus();
-			Log.d( getClass().getSimpleName(), "onServiceDisconnected" );
+			Log.d( TAG, "onServiceDisconnected" );
 		}
 	}
 
@@ -365,7 +367,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onDestroy() {
 		super.onDestroy();
 		releaseService();
-		Log.d( getClass().getSimpleName(), "onDestroy()" );
+		Log.d( TAG, "onDestroy()" );
 	}
 
 	@Override
