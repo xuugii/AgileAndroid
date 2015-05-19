@@ -10,6 +10,8 @@ package com.agilegithub.main.adapter;
     import java.util.concurrent.Executors;
     import java.util.concurrent.ScheduledExecutorService;
     import java.util.concurrent.TimeUnit;
+    import java.util.regex.Matcher;
+    import java.util.regex.Pattern;
 
     import android.app.Activity;
     import android.content.Context;
@@ -18,12 +20,10 @@ package com.agilegithub.main.adapter;
     import android.view.View;
     import android.view.ViewGroup;
     import android.widget.BaseExpandableListAdapter;
-    import android.widget.ImageView;
     import android.widget.TextView;
 
     import com.agilegithub.main.DataCommit;
     import com.agilegithub.main.GitHubParser;
-    import com.agilegithub.main.LoginActivity;
     import com.agilegithub.main.R;
 
     import org.eclipse.egit.github.core.CommitFile;
@@ -33,7 +33,6 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
     private Activity context;
     public static List<DataCommit> commits;
     public String TAG = "CommitExpandableListAdapter";
-    public static GitHubParser gitHub;
     public static CommitExpandableListAdapter listAdapter;
     public static int lastExpandedPosition;
 
@@ -71,17 +70,32 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
                 LayoutInflater amInflater = (LayoutInflater) context
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = amInflater.inflate(R.layout.commit_child_item_xml, null);
-                holder.stringName = (TextView) convertView.findViewById(R.id.ChildListPath);
+                holder.pathName = (TextView) convertView.findViewById(R.id.ChildListPath);
                 holder.changes = (TextView) convertView.findViewById(R.id.ChildListChanges);
+                holder.name = (TextView) convertView.findViewById(R.id.ChildListName);
                 convertView.setTag(holder);
             } else  {
                 holder = (ViewChildHolder) convertView.getTag();
             }
             CommitFile file = commits.get(groupPosition).changedFiles.get(childPosition);
-            holder.stringName.setText(file.getFilename());
+            holder.pathName.setText(file.getFilename());
             holder.changes.setText(Integer.toString(file.getChanges()));
+            holder.name.setText(getNameFromPath(file.getFilename()));
         }
         return convertView;
+    }
+
+    private static String getNameFromPath(String file){
+        String tmp = "";
+        Pattern p = Pattern.compile("/\\w+.");
+        Matcher m = p.matcher(file.trim());
+        while(m.find()){
+            tmp = m.group();
+        }
+        if (tmp.length()>2){
+            tmp = tmp.substring(1,tmp.length()-1);
+        }
+        return tmp;
     }
 
     public int getChildrenCount(int groupPosition) {
@@ -140,18 +154,9 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
     private static final ScheduledExecutorService worker = Executors
             .newSingleThreadScheduledExecutor();
 
-    void initGitHub(){
+    public void initGitHub(){
         Runnable task = new Runnable() {
             public void run() {
-                if (LoginActivity.password.length()!=0){
-                    gitHub = new GitHubParser(LoginActivity.userName,LoginActivity.password, LoginActivity.repoName);
-                } else {
-                    if (LoginActivity.token.length() == 0){
-                        //todo exit?
-                    } else {
-                        gitHub = new GitHubParser(LoginActivity.token, LoginActivity.repoName);
-                    }
-                }
                 updateComments();
             }
         };
@@ -177,7 +182,7 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
             public void run() {
                 for (int i = 0; i < commits.size()-1; i++) {
                     try {
-                        commits.get(i).changedFiles = gitHub.getChangedFiles(commits.get(i+1).sha, commits.get(i).sha);
+                        commits.get(i).changedFiles = GitHubParser.gitHubParser().getChangedFiles(commits.get(i+1).sha, commits.get(i).sha);
                     } catch (IOException e) {
                         Log.e(TAG, "Error in updateThread: " + e.getMessage());
                     }
@@ -192,10 +197,11 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
         worker.schedule(task1, 0, TimeUnit.SECONDS);
     }
 
-    public void updateComments(){
-        if (gitHub == null)
+
+    private void updateComments(){
+        if (GitHubParser.gitHubParser() == null)
             return;
-        commits = gitHub.getListCommits();
+        commits = GitHubParser.gitHubParser().getListCommits();
         updateThread();
     }
 
@@ -205,8 +211,9 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     class ViewChildHolder{
-        TextView stringName;
+        TextView pathName;
         TextView changes;
+        TextView name;
     }
 }
 

@@ -33,23 +33,5 @@ public class GitHubView implements IFragmentView{
         listView.setBackgroundColor(Color.GRAY);
         listAdapter = new GitHubViewListAdapter(activity);
         listView.setAdapter(listAdapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String sha = "db9871c2bdd9c787003b723fa300c892cf5b7680";    // head
-
-                // TODO: this commit SHA parameter has to be gotten from listview element (in git_notify_list)
-                // TODO: for this purpose we might add SHA field to ViewHolder class to retrieve it here
-
-                listAdapter.setSha(sha);
-                listAdapter.CommitFiles();
-                if (listAdapter.getCommitFiles() != null) {
-                    MainActivity.selectedFilesList = listAdapter.getCommitFiles();
-                }
-
-                // TODO: go to Select Files activity once the list of commit files is updated
-            }
-        });
     }
 }

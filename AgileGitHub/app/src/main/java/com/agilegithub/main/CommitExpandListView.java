@@ -39,7 +39,7 @@ public class CommitExpandListView implements IFragmentView{
     @Override
     public View getView() {
         if (CommitExpandableListAdapter.listAdapter != null)
-            CommitExpandableListAdapter.listAdapter.updateComments();
+            CommitExpandableListAdapter.listAdapter.initGitHub();
         return expListView;
     }
 

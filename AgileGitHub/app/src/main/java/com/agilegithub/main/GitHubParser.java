@@ -2,6 +2,8 @@ package com.agilegithub.main;
 
 import android.util.Log;
 
+import com.agilegithub.main.adapter.CommitExpandableListAdapter;
+
 import org.eclipse.egit.github.core.Commit;
 import org.eclipse.egit.github.core.CommitFile;
 import org.eclipse.egit.github.core.Repository;
@@ -19,6 +21,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Uguudei on 4/21/2015.
@@ -34,6 +39,17 @@ public class GitHubParser {
     RepositoryService repositoryService;
     SearchRepository searchRepository;
     ContentsService contentsService;
+    static GitHubParser gitHub;
+    static boolean problem = false;
+    public static GitHubParser gitHubParser(){
+        if (gitHub == null || problem){
+            gitHub =  new GitHubParser();
+            GitHubParser.getGitHubParserPassword(LoginActivity.userName, LoginActivity.password, LoginActivity.repoName);
+            problem = false;
+        }
+        return gitHub;
+    }
+
     //TODO: check user name!
     public String userName = "xuugii";
 
@@ -80,20 +96,44 @@ public class GitHubParser {
     public void setToken(String token) {
         this.token = token;
     }
+    private GitHubParser(){
 
-    public GitHubParser(String token, String repoName){
-        this.token = token;
-        this.loginType = LoginType.TOKEN;
-        this.repoName = repoName;
-        init();
+    }
+    public static GitHubParser getGitHubParserToken(String token, String repoName){
+        GitHubParser git = gitHubParser();
+        git.token = token;
+        git.loginType = LoginType.TOKEN;
+        git.repoName = repoName;
+        git.init();
+        gitHub = git;
+        loadList();
+        return gitHub;
     }
 
-    public GitHubParser(String user, String password, String repoName){
-        this.user = user;
-        this.password = password;
-        this.loginType = LoginType.PASSWORD;
-        this.repoName = repoName;
-        init();
+    public static GitHubParser getGitHubParserPassword(String user, String password, String repoName){
+        GitHubParser git = gitHubParser();
+        git.user = user;
+        git.password = password;
+        git.loginType = LoginType.PASSWORD;
+        git.repoName = repoName;
+        git.init();
+        gitHub = git;
+        loadList();
+        return gitHub;
+    }
+
+    private static void loadList(){
+        Runnable task = new Runnable() {
+            public void run() {
+                CommitExpandableListAdapter.commits = gitHub.getListCommits();
+                try {
+                    FilesAdapter.filesList = FilesAdapter.getFilesFromContent(gitHub.getRepoFiles());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        worker.schedule(task, 0, TimeUnit.SECONDS);
     }
 
     private void init(){
@@ -110,7 +150,7 @@ public class GitHubParser {
             searchRepository = service.searchRepositories(repoName).get(0);
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            System.out.println("Error: " + e.getMessage());
+            problem = true;
         }
     }
 
@@ -143,6 +183,7 @@ public class GitHubParser {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             Log.e("GitHubParser", "getListCommits()" + e.getMessage());
+            problem = true;
             e.printStackTrace();
         }
         return tmp;
@@ -202,18 +243,26 @@ public class GitHubParser {
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block
+            problem = true;
             e.printStackTrace();
         }
         return null;
     }
 
+    /**
+     * Threading
+     * @param args
+     */
+    private static final ScheduledExecutorService worker = Executors
+            .newSingleThreadScheduledExecutor();
+
     public static void main(String[] args) {
         // TODO Auto-generated method stub
-        GitHubParser tmp = new GitHubParser("a526523aab6a8c733eb27d456b9ac33d53989d6c", "AgileAndroid");
-        List<DataCommit> list = tmp.getListCommits();
-        for (int i = 0; i < list.size(); i++) {
-            System.out.println(list.get(i).author + ", message = " + list.get(i).commitMessage + ", date = " + list.get(i).date);
-        }
+       // GitHubParser tmp = new GitHubParser("a526523aab6a8c733eb27d456b9ac33d53989d6c", "AgileAndroid");
+      //  List<DataCommit> list = tmp.getListCommits();
+    //    for (int i = 0; i < list.size(); i++) {
+  //          System.out.println(list.get(i).author + ", message = " + list.get(i).commitMessage + ", date = " + list.get(i).date);
+//        }
 
 
 

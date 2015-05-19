@@ -5,6 +5,7 @@ import com.agilegithub.main.model.NavDrawerItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -63,7 +64,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	public static List<PlaceholderFragment> listFragment = new ArrayList<PlaceholderFragment>();
 	public enum State{loggedIn, logout} ;
 	static State state = State.logout;
-	static ArrayList<Files> selectedFilesList;
+	static List<Files> selectedFilesList = new Vector<>();
     public static boolean debug = true;
     public static String TAG = "MainActivity";
 
@@ -436,7 +437,11 @@ public class MainActivity extends Activity implements OnClickListener {
 						});
 						return logoutAbout;
 					case 2:
-						return (new SelectFiles(activity, selectedFilesList)).getListView();
+                        if (savedView == null) {
+                            savedView = (new SelectFiles(activity)).getListView();
+                            return savedView;
+                        }
+                        return savedView;
 					case 3:
 						if (savedView == null) {
 							savedView = (new GitHubView(activity)).getView();
@@ -467,7 +472,7 @@ public class MainActivity extends Activity implements OnClickListener {
                             savedView = (new CommitExpandListView(activity)).getView();
                             return savedView;
                         }
-
+                        return savedView;
 				}
 			} else {
 				switch (menu) {
@@ -476,11 +481,6 @@ public class MainActivity extends Activity implements OnClickListener {
 					case 1:
 						rootView = inflater.inflate(R.layout.login_main, container, false);
 						return (new LoginActivity(activity, rootView)).getView();
-                    case 7:
-                        if (savedView == null) {
-                            savedView = (new CommitExpandListView(activity)).getView();
-                            return savedView;
-                        }
 				}
 
 			}

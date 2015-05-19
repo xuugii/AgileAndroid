@@ -1,32 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:descendantFocusability="blocksDescendants">
+
+<TextView
+    android:id="@+id/ChildListChanges"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="10dp"
-    android:background="@drawable/childlist">
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1">
+    android:layout_alignParentRight="true"
+    android:textColor="@color/list_background_pressed"
+    android:paddingLeft="10dp"
+    android:textStyle="bold"
+    />
 
-        <TextView
-            android:id="@+id/ChildListPath"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:paddingLeft="10dp"
-            android:layout_weight=".7"/>
+<TextView
+    android:layout_alignParentLeft="true"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/ChildListName"
+    android:layout_toLeftOf="@id/ChildListChanges"
+    android:textStyle="bold"/>
 
-        <TextView
-            android:id="@+id/ChildListChanges"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:textColor="@color/list_background_pressed"
-            android:paddingLeft="10dp"
-            android:layout_weight=".3"/>
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/ChildListPath"
+    android:layout_below="@id/ChildListName"
+    android:textStyle="italic"
+    android:layout_toLeftOf="@id/ChildListChanges"
+    android:textSize="12sp"/>
 
-        </LinearLayout>
 
 </RelativeLayout>

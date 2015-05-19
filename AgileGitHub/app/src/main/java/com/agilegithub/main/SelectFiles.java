@@ -1,37 +1,32 @@
 package com.agilegithub.main;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.ListView;
 
+import org.eclipse.egit.github.core.RepositoryContents;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class SelectFiles {
 
     ListView lv;
-    ArrayList<Files> filesList;
     FilesAdapter fsAdapter;
-
-    public SelectFiles(Activity activity, ArrayList<Files> filesList_) {
+    public static String TAG = "SelectFiles";
+    public SelectFiles(Activity activity) {
 
         lv = new ListView(activity);
-
-        if (!filesList_.isEmpty()) {
-            filesList = filesList_;
-            fsAdapter = new FilesAdapter(filesList, activity);
-
-            lv.setAdapter(fsAdapter);
-            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    CheckBox chk = (CheckBox) view.findViewById(R.id.chk_box);
-                    chk.performClick();
-                }
-            });
-        }
+        fsAdapter = new FilesAdapter(activity);
+        lv.setAdapter(fsAdapter);
     }
+
 
     public ListView getListView(){
         return lv;

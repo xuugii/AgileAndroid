@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
  * Created by Uguudei on 4/26/2015.
  */
 public class GitHubViewListAdapter extends BaseAdapter {
-    public static GitHubParser gitHub;
     private LayoutInflater mInflater;
     public List<DataCommit> myItems;
     private Activity activity;
@@ -35,7 +34,7 @@ public class GitHubViewListAdapter extends BaseAdapter {
     }
 
     public void updateCommitFiles(){
-        commitFiles = gitHub.getListFiles(sha);
+        commitFiles = GitHubParser.gitHubParser().getListFiles(sha);
         updateThread();
     }
 
@@ -65,7 +64,7 @@ public class GitHubViewListAdapter extends BaseAdapter {
     }
 
     public void updateComments(){
-        myItems = gitHub.getListCommits();
+        myItems = GitHubParser.gitHubParser().getListCommits();
         updateThread();
     }
 
@@ -111,15 +110,6 @@ public class GitHubViewListAdapter extends BaseAdapter {
     void initGitHub(){
         Runnable task = new Runnable() {
             public void run() {
-                if (LoginActivity.password.length()!=0){
-                    gitHub = new GitHubParser(LoginActivity.userName,LoginActivity.password, LoginActivity.repoName);
-                } else {
-                    if (LoginActivity.token.length() == 0){
-                        //todo exit?
-                    } else {
-                        gitHub = new GitHubParser(LoginActivity.token, LoginActivity.repoName);
-                    }
-                }
                 updateComments();
             }
         };
@@ -145,7 +135,7 @@ public class GitHubViewListAdapter extends BaseAdapter {
             public void run() {
                 for (int i = 0; i < myItems.size()-1; i++) {
                     try {
-                        myItems.get(i).changedFiles = gitHub.getChangedFiles(myItems.get(i+1).sha, myItems.get(i).sha);
+                        myItems.get(i).changedFiles = GitHubParser.gitHubParser().getChangedFiles(myItems.get(i+1).sha, myItems.get(i).sha);
                     } catch (IOException e) {
                         Log.e(TAG, "Error in updateThread: " + e.getMessage());
                     }

@@ -134,10 +134,10 @@ public class GitHubService extends Service {
         Runnable task = new Runnable() {
             public void run() {
 //                TODO: make GitHubServer that stores all the list and information
-                if (gitHub == null) {
-                    initGitHub();
+                if (GitHubParser.gitHub == null) {
+                    GitHubParser.gitHubParser();
                 } else {
-                    changeSizeCommit = GitHubViewListAdapter.gitHub.getListCommits().size();
+                    changeSizeCommit = GitHubParser.gitHubParser().getListCommits().size();
                     if (firstTime) {
                         initSizeCommit = changeSizeCommit;
                         firstTime = false;
@@ -173,23 +173,6 @@ public class GitHubService extends Service {
                 }
                 serviceHandler.postDelayed(this, 1000L);
             }
-        }
-    }
-
-
-
-    GitHubParser gitHub = null;
-
-    void initGitHub(){
-        Runnable initGit = new Runnable() {
-            public void run() {
-                    gitHub = new GitHubParser(userName,password, LoginActivity.repoName);
-            }
-        };
-        try {
-            worker.schedule(initGit, 0, TimeUnit.SECONDS);
-        } catch (Exception e){
-
         }
     }
 }
