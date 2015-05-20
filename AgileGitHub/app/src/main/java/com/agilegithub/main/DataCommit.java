@@ -1,8 +1,11 @@
 package com.agilegithub.main;
 
+import com.agilegithub.main.Data.FileGit;
+
 import org.eclipse.egit.github.core.CommitFile;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Date;
 
 /**
@@ -12,8 +15,9 @@ public class DataCommit {
     public String author;
     public Date date;
     public String commitMessage;
-    public ArrayList<CommitFile> changedFiles;
+    public List<FileGit> changedFiles;
     public String changes;
     public String sha;
+    public List<FileGit> conflictedFiles;
 }
 

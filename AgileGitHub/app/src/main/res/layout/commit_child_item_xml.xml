@@ -30,6 +30,7 @@ android:descendantFocusability="blocksDescendants">
     android:layout_below="@id/ChildListName"
     android:textStyle="italic"
     android:layout_toLeftOf="@id/ChildListChanges"
+    android:layout_alignParentLeft="true"
     android:textSize="12sp"/>
 
 

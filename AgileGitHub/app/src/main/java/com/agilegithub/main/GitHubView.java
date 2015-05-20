@@ -34,4 +34,9 @@ public class GitHubView implements IFragmentView{
         listAdapter = new GitHubViewListAdapter(activity);
         listView.setAdapter(listAdapter);
     }
+
+    public void updateSyncData(){
+        if (listAdapter != null)
+        listAdapter.initGitHub(0);
+    }
 }

@@ -7,4 +7,5 @@ import android.view.View;
  */
 public interface IFragmentView {
     View getView();
+    void updateSyncData();
 }

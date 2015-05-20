@@ -77,4 +77,9 @@ public class NotificationCenter implements IFragmentView {
         return notificationServiceView;
     }
 
+    @Override
+    public void updateSyncData() {
+
+    }
+
 }

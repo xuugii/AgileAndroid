@@ -25,7 +25,6 @@ import java.util.Map;
  */
 public class CommitExpandListView implements IFragmentView{
 
-
     private Activity activity;
 
     List<String> groupList;
@@ -34,14 +33,21 @@ public class CommitExpandListView implements IFragmentView{
     ExpandableListView expListView;
     private int lastExpandedPosition = -1;
     public static String TAG = "CommitExpandListView";
+    static CommitExpandableListAdapter expListAdapter = null;
 
 
     @Override
     public View getView() {
-        if (CommitExpandableListAdapter.listAdapter != null)
-            CommitExpandableListAdapter.listAdapter.initGitHub();
         return expListView;
     }
+    static private volatile int previousGroupPosition = -1;
+
+    @Override
+    public void updateSyncData() {
+        if (expListAdapter != null)
+            expListAdapter.initGitHub();
+    }
+
 
     public CommitExpandListView(final Activity activity){
         this.activity = activity;
@@ -49,7 +55,7 @@ public class CommitExpandListView implements IFragmentView{
         expListView = new ExpandableListView(activity);
         LinearLayout.LayoutParams listParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         expListView.setLayoutParams(listParams);
-        final CommitExpandableListAdapter expListAdapter = new CommitExpandableListAdapter(activity);
+        expListAdapter = new CommitExpandableListAdapter(activity);
         expListView.setAdapter(expListAdapter);
         expListView.setLongClickable(true);
         expListView.setClickable(true);
@@ -72,11 +78,22 @@ public class CommitExpandListView implements IFragmentView{
             }
         });
 
+
+
         expListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
                 if (MainActivity.debug)
                     Log.d(TAG, "setOnGroupClickListener is clicked : " + groupPosition);
-                expListView.expandGroup(groupPosition);
+                if (expListView.isGroupExpanded(groupPosition)){
+                    if (groupPosition == previousGroupPosition){
+                        expListView.collapseGroup(groupPosition);
+                    } else {
+                        expListView.expandGroup(groupPosition);
+                    }
+                } else {
+                    expListView.expandGroup(groupPosition);
+                }
+                previousGroupPosition = groupPosition;
                 return true;
             }
         });
@@ -86,6 +103,8 @@ public class CommitExpandListView implements IFragmentView{
                                            int index, long arg3) {
                 if (MainActivity.debug)
                     Log.d(TAG, "setOnItemLongClickListener is clicked : " + index);
+                if (CommitExpandableListAdapter.commits == null || CommitExpandableListAdapter.commits.size() < index)
+                    return false;
                 Intent display = new Intent(MainActivity.activity, DisplayWebView.class);
                 String all = "";
                 if (CommitExpandableListAdapter.commits.get(index) != null){
@@ -95,11 +114,64 @@ public class CommitExpandListView implements IFragmentView{
                         all = all + "/n" + data.changedFiles.get(i).getPatch();
                     }
                 }
-                expListView.expandGroup(index);
                 display.putExtra("html", ""+ all);
                 MainActivity.activity.startActivity(display);
                 return false;
             }
         });
+
+        expListView.setOnItemLongClickListener(new ExpandableListView.OnItemLongClickListener(){
+            public boolean onItemLongClick(AdapterView<?> arg0, View v,
+                                           int index, long id) {
+                if (MainActivity.debug)
+                    Log.d(TAG, "setOnItemLongClickListener is clicked : " + index);
+                if (CommitExpandableListAdapter.commits == null ||
+                        CommitExpandableListAdapter.commits.size() < index ||
+                        CommitExpandableListAdapter.commits.get(index).changedFiles == null)
+                    return false;
+
+                int itemType = ExpandableListView.getPackedPositionType(id);
+                int childPosition = -1;
+                int groupPosition = -1;
+                if ( itemType == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+                    childPosition = ExpandableListView.getPackedPositionChild(id);
+                    groupPosition = ExpandableListView.getPackedPositionGroup(id);
+                    Intent display = new Intent(MainActivity.activity, DisplayWebView.class);
+                    String all = "";
+                    if (CommitExpandableListAdapter.commits.get(groupPosition) != null){
+
+                        DataCommit data = CommitExpandableListAdapter.commits.get(groupPosition);
+                        if (data.changedFiles.size()>childPosition){
+                            all = data.changedFiles.get(childPosition).getPatch();
+                            display.putExtra("html", ""+ all);
+                            MainActivity.activity.startActivity(display);
+                            return true;
+                        }
+                    }
+                    return true; //true if we consumed the click, false if not
+
+                } else if(itemType == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+                    groupPosition = ExpandableListView.getPackedPositionGroup(id);
+                    Intent display = new Intent(MainActivity.activity, DisplayWebView.class);
+                    String all = "";
+                    if (CommitExpandableListAdapter.commits.get(groupPosition) != null){
+
+                        DataCommit data = CommitExpandableListAdapter.commits.get(groupPosition);
+                        for (int i = 0; i < data.changedFiles.size(); i++) {
+                            all = all + "/n" + data.changedFiles.get(i).getPatch();
+                        }
+                    }
+                    display.putExtra("html", ""+ all);
+                    MainActivity.activity.startActivity(display);
+                    return true; //true if we consumed the click, false if not
+
+                } else {
+                    // null item; we don't consume the click
+                    return true;
+                }
+            }
+        });
+
+        updateSyncData();
     }
 }

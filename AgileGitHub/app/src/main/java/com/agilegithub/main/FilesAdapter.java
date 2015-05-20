@@ -11,9 +11,15 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ListAdapter;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.agilegithub.main.Data.FileGit;
+
+import org.eclipse.egit.github.core.CommitFile;
 import org.eclipse.egit.github.core.RepositoryContents;
 
 import java.io.IOException;
@@ -28,51 +34,11 @@ import java.util.concurrent.TimeUnit;
  * Created by Alexey on 04.05.2015.
  */
 
-class Files {
-    String name;
-    String path;
-    boolean selected = false;
 
-    public Files(String name, String path) {
-        super();
-        this.name = name;
-        this.path = path;
-    }
+public class FilesAdapter extends BaseAdapter implements AdapterView.OnItemClickListener, Filterable {
 
-    public String getName() {
-        if (name == null)
-            return "EMPTY";
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public void performClick(){
-        selected = !selected;
-    }
-
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-}
-
-public class FilesAdapter extends BaseAdapter implements AdapterView.OnItemClickListener {
-
-    public static List<Files> filesList;
+    public static List<FileGit> filesList = new Vector<>();
+    public static List<FileGit> filesListFilter;
     private Activity context;
     public static String TAG = "FilesAdapter";
     public FilesAdapter fileAdapter;
@@ -97,6 +63,83 @@ public class FilesAdapter extends BaseAdapter implements AdapterView.OnItemClick
         filesList.get(position).performClick();
         chk.performClick();
     }
+    private static int filter_size = 0;
+    private static boolean filter_start = false;
+
+    @Override
+    public Filter getFilter() {
+        Filter filter = new Filter() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                if ( results != null)
+                    filesList = (List<FileGit>) results.values;
+                else
+                    filesList = filesListFilter;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                if (constraint.length() == 0){
+                    filter_size = 0;
+                    filter_start = false;
+                    return null;
+                }
+
+                if (constraint.length() > filter_size){
+                    if (!filter_start){
+                        filesListFilter = new Vector<>(filesList);
+                        filter_start = true;
+                    }
+
+                    filter_size = constraint.length();
+                    FilterResults results = new FilterResults();
+                    List<FileGit> FilteredArrayNames = new Vector<FileGit>();
+
+                    // perform your search here using the searchConstraint String.
+
+                    constraint = constraint.toString().toLowerCase();
+                    for (int i = 0; i < filesList.size(); i++) {
+                        String dataNames = filesList.get(i).getName();
+                        if (dataNames.toLowerCase().startsWith(constraint.toString()))  {
+                            FilteredArrayNames.add(filesList.get(i));
+                        }
+                    }
+
+                    results.count = FilteredArrayNames.size();
+                    results.values = FilteredArrayNames;
+                    if (MainActivity.debug)
+                        Log.d("VALUES", results.values.toString());
+                    return results;
+                } else {
+                    filesList = filesListFilter;
+                    filter_size = constraint.length();
+                    FilterResults results = new FilterResults();
+                    List<FileGit> FilteredArrayNames = new Vector<FileGit>();
+
+                    // perform your search here using the searchConstraint String.
+
+                    constraint = constraint.toString().toLowerCase();
+                    for (int i = 0; i < filesList.size(); i++) {
+                        String dataNames = filesList.get(i).getName();
+                        if (dataNames.toLowerCase().startsWith(constraint.toString()))  {
+                            FilteredArrayNames.add(filesList.get(i));
+                        }
+                    }
+
+                    results.count = FilteredArrayNames.size();
+                    results.values = FilteredArrayNames;
+                    Log.e("VALUES", results.values.toString());
+                    return results;
+                }
+            }
+        };
+
+        return filter;
+    }
+
 
     private static class FilesHolder {
         public TextView fileName;
@@ -135,11 +178,27 @@ public class FilesAdapter extends BaseAdapter implements AdapterView.OnItemClick
         } else {
             holder = (FilesHolder) v.getTag();
         }
-        Files f = filesList.get(position);
+        FileGit f = filesList.get(position);
         holder.fileName.setText(f.getName());
         holder.pathView.setText("" + f.getPath());
         holder.chkbox.setChecked(f.isSelected());
         holder.chkbox.setTag(f);
+        holder.chkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean checked) {
+                if (filesList.get(position).isSelected()){
+                    MainActivity.selectedFilesList.remove(filesList.get(position));
+                } else {
+                    MainActivity.selectedFilesList.add(filesList.get(position));
+                }
+                if (MainActivity.debug){
+                    Log.e(TAG, "FileSelected. selectedFilesList size:  " + MainActivity.selectedFilesList.size());
+                }
+                filesList.get(position).performClick();
+
+            }
+
+        });
         return v;
     }
 
@@ -156,23 +215,23 @@ public class FilesAdapter extends BaseAdapter implements AdapterView.OnItemClick
         };
         worker.schedule(task, 0, TimeUnit.SECONDS);
     }
-
     public void updateComments() {
         try {
-            filesList = getFilesFromContent(GitHubParser.gitHubParser().getRepoFiles());
+            if (filesList == null)
+                return;
+             getFilesFromContent(GitHubParser.gitHubParser().getRepoFiles(),filesList);
         } catch (IOException e) {
             Log.e(TAG, "updateComments failed: " + e.getMessage());
         }
         updateThread();
     }
-
-    public static List<Files> getFilesFromContent(ArrayList<RepositoryContents> repo){
-        List<Files> tmp = new Vector<>();
+    public static void getFilesFromContent(ArrayList<RepositoryContents> repo,  List<FileGit> list){
         for (int i = 0; i < repo.size(); i++) {
-            Files file = new Files(repo.get(i).getName(), repo.get(i).getPath());
-            tmp.add(file);
+            FileGit file = new FileGit(repo.get(i).getName(), repo.get(i).getPath());
+            if (!list.contains(file)){
+                list.add(0,file);
+            }
         }
-        return tmp;
     }
 
     // update user Interface

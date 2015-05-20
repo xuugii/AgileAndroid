@@ -44,6 +44,11 @@ public class PlanningPokerView implements IFragmentView{
         return grid;
     }
 
+    @Override
+    public void updateSyncData() {
+
+    }
+
     private class tileOnClickListener implements View.OnClickListener {
 
         @Override

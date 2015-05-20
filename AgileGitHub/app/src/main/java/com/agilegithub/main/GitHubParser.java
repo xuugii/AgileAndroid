@@ -2,6 +2,7 @@ package com.agilegithub.main;
 
 import android.util.Log;
 
+import com.agilegithub.main.Data.FileGit;
 import com.agilegithub.main.adapter.CommitExpandableListAdapter;
 
 import org.eclipse.egit.github.core.Commit;
@@ -41,11 +42,17 @@ public class GitHubParser {
     ContentsService contentsService;
     static GitHubParser gitHub;
     static boolean problem = false;
+    public static String TAG = "GitHubParser";
+    private static volatile int selfFixLogin = 0;
     public static GitHubParser gitHubParser(){
         if (gitHub == null || problem){
             gitHub =  new GitHubParser();
-            GitHubParser.getGitHubParserPassword(LoginActivity.userName, LoginActivity.password, LoginActivity.repoName);
+            if (selfFixLogin>1){
+                gitHub.getGitHubParserPassword(LoginActivity.userName, LoginActivity.password, LoginActivity.repoName);
+                selfFixLogin = 0;
+            }
             problem = false;
+            selfFixLogin++;
         }
         return gitHub;
     }
@@ -99,41 +106,58 @@ public class GitHubParser {
     private GitHubParser(){
 
     }
-    public static GitHubParser getGitHubParserToken(String token, String repoName){
-        GitHubParser git = gitHubParser();
-        git.token = token;
-        git.loginType = LoginType.TOKEN;
-        git.repoName = repoName;
-        git.init();
-        gitHub = git;
-        loadList();
+    public GitHubParser getGitHubParserToken(String token, String repoName){
+        gitHub.token = token;
+        gitHub.loginType = LoginType.TOKEN;
+        gitHub.repoName = repoName;
+        loadListInitGit();
         return gitHub;
     }
 
-    public static GitHubParser getGitHubParserPassword(String user, String password, String repoName){
-        GitHubParser git = gitHubParser();
-        git.user = user;
-        git.password = password;
-        git.loginType = LoginType.PASSWORD;
-        git.repoName = repoName;
-        git.init();
-        gitHub = git;
-        loadList();
+    public GitHubParser getGitHubParserPassword(String user, String password, String repoName){
+        gitHub.user = user;
+        gitHub.password = password;
+        gitHub.loginType = LoginType.PASSWORD;
+        gitHub.repoName = repoName;
+        loadListInitGit();
         return gitHub;
     }
 
-    private static void loadList(){
-        Runnable task = new Runnable() {
+    private static void loadListInitGit(){
+        Runnable expandList = new Runnable() {
             public void run() {
+                gitHub.init();
                 CommitExpandableListAdapter.commits = gitHub.getListCommits();
                 try {
-                    FilesAdapter.filesList = FilesAdapter.getFilesFromContent(gitHub.getRepoFiles());
-                } catch (IOException e) {
+                    if (CommitExpandableListAdapter.commits == null)
+                        CommitExpandableListAdapter.commits = new Vector<>();
+                    CommitExpandableListAdapter.commits = gitHub.getListCommits();
+                } catch (Exception e) {
                     e.printStackTrace();
+                }
+                for (int i = 0; i < CommitExpandableListAdapter.commits.size()-1; i++) {
+                    try {
+                        CommitExpandableListAdapter.commits.get(i).changedFiles = gitHub.getChangedFiles(CommitExpandableListAdapter.commits.get(i+1).sha, CommitExpandableListAdapter.commits.get(i).sha);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error in updateThread: " + e.getMessage());
+                    }
                 }
             }
         };
-        worker.schedule(task, 0, TimeUnit.SECONDS);
+        worker.schedule(expandList, 0, TimeUnit.SECONDS);
+
+        Runnable fileGIT = new Runnable() {
+            public void run() {
+                try {
+                    if (FilesAdapter.filesList == null)
+                        FilesAdapter.filesList = new Vector<>();
+                        FilesAdapter.getFilesFromContent(GitHubParser.gitHubParser().getRepoFiles(),FilesAdapter.filesList);
+                } catch (IOException e) {
+                    Log.e(TAG, "updateComments failed: " + e.getMessage());
+                }
+            }
+        };
+        worker.schedule(fileGIT, 0, TimeUnit.SECONDS);
     }
 
     private void init(){
@@ -154,10 +178,13 @@ public class GitHubParser {
         }
     }
 
-    public ArrayList<CommitFile> getChangedFiles(String baseSha, String headSha) throws IOException{
-        ArrayList <CommitFile> tmp = new ArrayList<CommitFile>();
+    public ArrayList<FileGit> getChangedFiles(String baseSha, String headSha) throws IOException{
+        ArrayList <FileGit> tmp = new ArrayList<FileGit>();
         RepositoryCommitCompare com = commitService.compare(searchRepository, baseSha, headSha);
-        tmp.addAll(com.getFiles());
+        for (int i = 0; i < com.getFiles().size(); i++) {
+            FileGit fileGit = new FileGit(com.getFiles().get(i));
+            tmp.add(fileGit);
+        }
         return tmp;
     }
 
@@ -192,8 +219,23 @@ public class GitHubParser {
     public ArrayList<RepositoryContents> getRepoFiles() throws IOException {
         ArrayList<RepositoryContents> tmp = new ArrayList<>();
         dirFlatten(tmp, "");
-        System.out.println("Size of the files: " + tmp.size());
         return tmp;
+    }
+
+    int test;
+    private void dirFlattenTest(List<RepositoryContents> savedArray, String dirPath) throws IOException{
+        List<RepositoryContents> files;
+        if (dirPath == null || dirPath == "")
+            files = contentsService.getContents(searchRepository);
+        else
+            files = contentsService.getContents(searchRepository, dirPath);
+        for (int i = 0; i < files.size(); i++) {
+            if (files.get(i).getType().equals(RepositoryContents.TYPE_DIR)){
+
+            } else {
+                savedArray.add(files.get(i));
+            }
+        }
     }
 
     private void dirFlatten(ArrayList<RepositoryContents> savedArray, String dirPath) throws IOException{
@@ -210,43 +252,6 @@ public class GitHubParser {
             }
         }
 
-    }
-
-    public ArrayList<Files> getListFiles(String sha){
-        try {
-            ArrayList<Files> tmp = new ArrayList<Files>();
-            for (Repository repo : service.getRepositories()){
-                if (repo.getName().equals(repoName)) {
-                    List<RepositoryCommit> lst = commitService.getCommits(repo);
-                    int size = lst.size();
-                    for (int i = 0; i < size; i++) {
-                        Commit commit = lst.get(i).getCommit();
-                        String url = commit.getUrl();
-                        url = url.substring(url.lastIndexOf('/') + 1);
-                        if (url.equals(sha)){
-
-                            List<CommitFile> modifiedFiles = commitService.getCommit(repo, sha).getFiles();
-                            for (CommitFile file: modifiedFiles)
-                            {
-                                tmp.add(new Files(file.getFilename(), file.getRawUrl()));
-                            }
-
-                            // TODO: get project files here instead of getting commit-related files
-                            // Note that we only need files prior to a selected commit
-                            // So we shall probably use commit's SHA in "getAllFiles" method
-
-                            break;
-                        }
-                    }
-                    return tmp;
-                }
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            problem = true;
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**

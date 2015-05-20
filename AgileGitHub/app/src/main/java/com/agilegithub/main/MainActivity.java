@@ -1,11 +1,16 @@
 package com.agilegithub.main;
 
+import com.agilegithub.main.Data.FileGit;
+import com.agilegithub.main.adapter.CommitExpandableListAdapter;
 import com.agilegithub.main.adapter.NavDrawerListAdapter;
 import com.agilegithub.main.model.NavDrawerItem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -28,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -35,9 +41,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.View.OnClickListener;
 
+import org.eclipse.egit.github.core.CommitFile;
+
 public class MainActivity extends Activity implements OnClickListener {
 	private DrawerLayout mDrawerLayout;
-	private ListView mDrawerList;
+	private static ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
 
 	// nav drawer title
@@ -50,8 +58,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private String[] navMenuTitles;
 	private TypedArray navMenuIcons;
 
-	private ArrayList<NavDrawerItem> navDrawerItems;
-	private NavDrawerListAdapter adapter;
+	private static ArrayList<NavDrawerItem> navDrawerItems;
+	private static NavDrawerListAdapter adapter;
 	public static boolean loggedIn = false;
 	public static Activity activity;
 	static GitHubParser gitHub;
@@ -64,7 +72,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	public static List<PlaceholderFragment> listFragment = new ArrayList<PlaceholderFragment>();
 	public enum State{loggedIn, logout} ;
 	static State state = State.logout;
-	static List<Files> selectedFilesList = new Vector<>();
+	static List<FileGit> selectedFilesList = new Vector<>();
     public static boolean debug = true;
     public static String TAG = "MainActivity";
 
@@ -99,18 +107,18 @@ public class MainActivity extends Activity implements OnClickListener {
 		// adding nav drawer items to array
 		// Home
 		navDrawerItems.add(new NavDrawerItem(navMenuTitles[0], navMenuIcons.getResourceId(0, -1)));
-		// Find People
-		navDrawerItems.add(new NavDrawerItem(navMenuTitles[1], navMenuIcons.getResourceId(1, -1)));
-		// Photos
-		navDrawerItems.add(new NavDrawerItem(navMenuTitles[2], navMenuIcons.getResourceId(2, -1)));
-		// Communities, Will add a counter here
-		navDrawerItems.add(new NavDrawerItem(navMenuTitles[3], navMenuIcons.getResourceId(3, -1), true, "22"));
-		// Pages
+        // Select files
+		navDrawerItems.add(new NavDrawerItem(navMenuTitles[1], navMenuIcons.getResourceId(1, -1), true, "?"));
+        // Conflict status
+		navDrawerItems.add(new NavDrawerItem(navMenuTitles[2], navMenuIcons.getResourceId(2, -1),true,"?"));
+        // Planning Poker
+		navDrawerItems.add(new NavDrawerItem(navMenuTitles[3], navMenuIcons.getResourceId(3, -1)));
+        // Notification
 		navDrawerItems.add(new NavDrawerItem(navMenuTitles[4], navMenuIcons.getResourceId(4, -1)));
-		// What's hot, We  will add a counter here
-		navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons.getResourceId(5, -1), true, "50+"));
-
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[6], navMenuIcons.getResourceId(6, -1), true, "50+"));
+        // Service
+		navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons.getResourceId(5, -1), true, "?"));
+        //Commits and changes
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[6], navMenuIcons.getResourceId(6, -1), true, "?"));
 		
 
 		// Recycle the typed array
@@ -151,7 +159,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			displayView(0);
 		}
 
-		selectedFilesList = new ArrayList<Files>();
+		selectedFilesList = new ArrayList<FileGit>();
 	}
 
 	/**
@@ -389,13 +397,26 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 
+    public static void hideKeyboard() {
+        // Check if no view has focus:
+        if (activity != null){
+            View view = activity.getCurrentFocus();
+            if (view != null) {
+                InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(activity.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }
+    }
+
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
 	public static class PlaceholderFragment extends Fragment {
 
 		public View savedView = null;
-		public int SIMPLE_NOTFICATION_ID;
+        IFragmentView savedFragment = null;
+        public int SIMPLE_NOTFICATION_ID;
+
 		/**
 		 * The fragment argument representing the section number for this
 		 * fragment.
@@ -422,6 +443,8 @@ public class MainActivity extends Activity implements OnClickListener {
 								 Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 			int menu = getArguments().getInt(ARG_SECTION_NUMBER);
+            updateNews(0);
+            hideKeyboard();
 			if (state == State.loggedIn) {
 				switch (menu) {
 					case 1:
@@ -438,15 +461,22 @@ public class MainActivity extends Activity implements OnClickListener {
 						return logoutAbout;
 					case 2:
                         if (savedView == null) {
-                            savedView = (new SelectFiles(activity)).getListView();
+                            rootView = inflater.inflate(R.layout.file_list_view, container, false);
+                            savedFragment = new SelectFiles(activity, rootView);
+                            savedView = savedFragment.getView();
                             return savedView;
+                        } else {
+                            savedFragment.updateSyncData();
                         }
                         return savedView;
-					case 3:
+                    case 3:
 						if (savedView == null) {
-							savedView = (new GitHubView(activity)).getView();
+                            savedFragment = new GitHubView(activity);
+							savedView = savedFragment.getView();
 							return savedView;
-						}
+						} else {
+                            savedFragment.updateSyncData();
+                        }
 						return savedView;
 					case 4:
 						return (new PlanningPokerView(activity)).getView();
@@ -469,8 +499,11 @@ public class MainActivity extends Activity implements OnClickListener {
 						return rootViewService;
                     case 7:
                         if (savedView == null) {
-                            savedView = (new CommitExpandListView(activity)).getView();
+                            savedFragment = new CommitExpandListView(activity);
+                            savedView = savedFragment.getView();
                             return savedView;
+                        } else {
+                            savedFragment.updateSyncData();
                         }
                         return savedView;
 				}
@@ -487,5 +520,47 @@ public class MainActivity extends Activity implements OnClickListener {
 			return rootView;
 		}
 	}
+
+    private static final ScheduledExecutorService worker = Executors
+            .newSingleThreadScheduledExecutor();
+
+    private static boolean onGoingUpdate = false;
+    static void updateNews(final int seconds){
+        if (onGoingUpdate){
+            return;
+        } else {
+            onGoingUpdate = true;
+        }
+        Runnable updateNewsCount = new Runnable() {
+            public void run() {
+                if (CommitExpandableListAdapter.commits != null){
+                    navDrawerItems.get(6).setCount(Integer.toString(CommitExpandableListAdapter.latestChanges));
+                } else {
+                    updateNews(seconds + 1);
+                    onGoingUpdate = false;
+                    return;
+                }
+
+                if (FilesAdapter.filesList != null){
+                    navDrawerItems.get(1).setCount(Integer.toString(FilesAdapter.filesList.size()));
+
+                }
+
+                if (GitHubViewListAdapter.conflicted != null){
+                    navDrawerItems.get(2).setCount(Integer.toString(GitHubViewListAdapter.conflicted.size()));
+                }
+                activity.runOnUiThread (new Thread(new Runnable() {
+                    public void run(){
+                        adapter.notifyDataSetChanged();
+                    }
+                }));
+                onGoingUpdate = false;
+            }
+        };
+        worker.schedule(updateNewsCount, seconds, TimeUnit.SECONDS);
+    }
+
+
+
 
 }

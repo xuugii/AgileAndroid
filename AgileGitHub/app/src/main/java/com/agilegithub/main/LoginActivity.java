@@ -64,6 +64,11 @@ public class LoginActivity implements IFragmentView,OnClickListener {
         repoName = repoNameT;
         loggedIn = true;
         MainActivity.state = MainActivity.State.loggedIn;
+        if (tokenT.isEmpty() || tokenT.equals("") ){
+            GitHubParser.gitHubParser().getGitHubParserPassword(userName, password, repoName);
+        } else {
+            GitHubParser.gitHubParser().getGitHubParserPassword(userName, tokenT, repoName);
+        }
         return true;
     }
 
@@ -79,5 +84,10 @@ public class LoginActivity implements IFragmentView,OnClickListener {
     @Override
     public View getView() {
         return loginView;
+    }
+
+    @Override
+    public void updateSyncData() {
+
     }
 }

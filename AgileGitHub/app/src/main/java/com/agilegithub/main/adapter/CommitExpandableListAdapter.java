@@ -15,6 +15,7 @@ package com.agilegithub.main.adapter;
 
     import android.app.Activity;
     import android.content.Context;
+    import android.provider.MediaStore;
     import android.util.Log;
     import android.view.LayoutInflater;
     import android.view.View;
@@ -22,6 +23,7 @@ package com.agilegithub.main.adapter;
     import android.widget.BaseExpandableListAdapter;
     import android.widget.TextView;
 
+    import com.agilegithub.main.Data.FileGit;
     import com.agilegithub.main.DataCommit;
     import com.agilegithub.main.GitHubParser;
     import com.agilegithub.main.R;
@@ -35,6 +37,7 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
     public String TAG = "CommitExpandableListAdapter";
     public static CommitExpandableListAdapter listAdapter;
     public static int lastExpandedPosition;
+    public static volatile int latestChanges = 0;
 
 
     public CommitExpandableListAdapter(Activity context, List<DataCommit> commits) {
@@ -42,8 +45,7 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
         this.context = context;
         this.commits = commits;
         listAdapter = this;
-        listAdapter.
-        commits = new ArrayList<>();
+        listAdapter.commits = new ArrayList<>();
     }
 
     public CommitExpandableListAdapter(Activity context) {
@@ -64,39 +66,32 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(final int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
         ViewChildHolder holder;
-        if (!commits.isEmpty() && !commits.get(groupPosition).changedFiles.isEmpty()){
-            if (convertView == null || (ViewChildHolder) convertView.getTag() == null) {
-                holder = new ViewChildHolder();
-                LayoutInflater amInflater = (LayoutInflater) context
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = amInflater.inflate(R.layout.commit_child_item_xml, null);
-                holder.pathName = (TextView) convertView.findViewById(R.id.ChildListPath);
-                holder.changes = (TextView) convertView.findViewById(R.id.ChildListChanges);
-                holder.name = (TextView) convertView.findViewById(R.id.ChildListName);
-                convertView.setTag(holder);
-            } else  {
-                holder = (ViewChildHolder) convertView.getTag();
+        if (commits != null && commits.get(groupPosition).changedFiles != null) {
+
+            if (!commits.isEmpty() &&
+                    !commits.get(groupPosition).changedFiles.isEmpty()) {
+                if (convertView == null || (ViewChildHolder) convertView.getTag() == null) {
+                    holder = new ViewChildHolder();
+                    LayoutInflater amInflater = (LayoutInflater) context
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    convertView = amInflater.inflate(R.layout.commit_child_item_xml, null);
+                    holder.pathName = (TextView) convertView.findViewById(R.id.ChildListPath);
+                    holder.changes = (TextView) convertView.findViewById(R.id.ChildListChanges);
+                    holder.name = (TextView) convertView.findViewById(R.id.ChildListName);
+                    convertView.setTag(holder);
+                } else {
+                    holder = (ViewChildHolder) convertView.getTag();
+                }
+                FileGit file = commits.get(groupPosition).changedFiles.get(childPosition);
+                holder.pathName.setText(file.getFilename());
+                holder.changes.setText(Integer.toString(file.getChanges()));
+                holder.name.setText(FileGit.getNameFromPath(file.getFilename()));
             }
-            CommitFile file = commits.get(groupPosition).changedFiles.get(childPosition);
-            holder.pathName.setText(file.getFilename());
-            holder.changes.setText(Integer.toString(file.getChanges()));
-            holder.name.setText(getNameFromPath(file.getFilename()));
         }
         return convertView;
     }
 
-    private static String getNameFromPath(String file){
-        String tmp = "";
-        Pattern p = Pattern.compile("/\\w+.");
-        Matcher m = p.matcher(file.trim());
-        while(m.find()){
-            tmp = m.group();
-        }
-        if (tmp.length()>2){
-            tmp = tmp.substring(1,tmp.length()-1);
-        }
-        return tmp;
-    }
+
 
     public int getChildrenCount(int groupPosition) {
         if (commits!= null && commits.get(groupPosition).changedFiles != null)
@@ -134,7 +129,7 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
                 holder = (ViewHolder) convertView.getTag();
             }
             holder.message.setText(commits.get(groupPosition).commitMessage);
-            holder.stringName.setText(commits.get(groupPosition).author);
+            holder.stringName.setText(commits.get(groupPosition).date.toString());
         }
         return convertView;
     }
@@ -186,6 +181,14 @@ public class CommitExpandableListAdapter extends BaseExpandableListAdapter {
                     } catch (IOException e) {
                         Log.e(TAG, "Error in updateThread: " + e.getMessage());
                     }
+                }
+                if (commits.get(0).changedFiles != null) {
+                    int changesTotal = 0;
+                    List<FileGit> com = commits.get(0).changedFiles;
+                    for (int i = 0; i < com.size(); i++) {
+                        changesTotal = com.get(i).getChanges() + changesTotal;
+                    }
+                    latestChanges = changesTotal;
                 }
                 context.runOnUiThread (new Thread(new Runnable() {
                     public void run(){
