@@ -145,12 +145,13 @@ public class GitHubService extends Service {
                     if (initSizeCommit != -1){
                         if (changeSizeCommit > initSizeCommit){
                             mNotificationManager.notify(0, notifyDetails.build());
+                            initSizeCommit = changeSizeCommit;
                          }
                     }
-                    if (showOnceNotification && counter>=10){
+                    /*if (showOnceNotification && counter>=10){
                         mNotificationManager.notify(0, notifyDetails.build());
                         showOnceNotification = false;
-                    }
+                    }*/
 
                 }
             }
@@ -171,7 +172,7 @@ public class GitHubService extends Service {
                     Log.i(TAG,
                             "Incrementing counter in the run method");
                 }
-                serviceHandler.postDelayed(this, 1000L);
+                serviceHandler.postDelayed(this, 5000L);
             }
         }
     }
