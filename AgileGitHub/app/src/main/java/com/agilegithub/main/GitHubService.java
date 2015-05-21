@@ -14,6 +14,10 @@ import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.agilegithub.main.Data.FileGit;
+import com.agilegithub.main.adapter.CommitExpandableListAdapter;
+
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -128,7 +132,6 @@ public class GitHubService extends Service {
         serviceStarted = false;
         Log.d(TAG, "onDestroy()");
     }
-
     public volatile boolean showOnceNotification;
     public synchronized void getCommit(){
         Runnable task = new Runnable() {
@@ -137,15 +140,30 @@ public class GitHubService extends Service {
                 if (GitHubParser.gitHub == null) {
                     GitHubParser.gitHubParser();
                 } else {
-                    changeSizeCommit = GitHubParser.gitHubParser().getListCommits().size();
+                    CommitExpandableListAdapter.commits = GitHubParser.gitHubParser().getListCommits();
+                    changeSizeCommit = CommitExpandableListAdapter.commits.size();
+
                     if (firstTime) {
                         initSizeCommit = changeSizeCommit;
                         firstTime = false;
                     }
                     if (initSizeCommit != -1){
                         if (changeSizeCommit > initSizeCommit){
-                            mNotificationManager.notify(0, notifyDetails.build());
                             initSizeCommit = changeSizeCommit;
+                            for (int i = 0; i < changeSizeCommit-initSizeCommit; i++) {
+                                try {
+                                    CommitExpandableListAdapter.commits.get(i).changedFiles = GitHubParser.gitHubParser().getChangedFiles(CommitExpandableListAdapter.commits.get(i+1).sha, CommitExpandableListAdapter.commits.get(i).sha);
+                                    for (int j = 0; j < CommitExpandableListAdapter.commits.get(i).changedFiles.size(); j++) {
+                                        if(MainActivity.selectedFilesList.contains(CommitExpandableListAdapter.commits.get(i).changedFiles.get(j))) {
+                                            mNotificationManager.notify(0, notifyDetails.build());
+                                            return;
+                                        }
+                                    }
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Error in updateThread: " + e.getMessage());
+                                }
+                            }
+                            mNotificationManager.notify(0, notifyDetails.build());
                          }
                     }
                     /*if (showOnceNotification && counter>=10){
